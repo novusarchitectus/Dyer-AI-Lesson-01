@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Dyer AI Lesson 01 — вопросы коллег">
+</head>
+<body>
+<title>Dyer AI Lesson 01</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@200;300;400;500&display=swap">
+<style>
+/* One deliberate look: Dyer white page, dark-grey text, Dyer blue line drawings.
+   Full-screen slides; one complete wheel stroke = next slide. */
+:root {
+  --bg: #ffffff;
+  --text: #3c4048;
+  --muted: #8a9099;
+  --line: #e3e8ef;
+  --blue: #163F79;
+  --deep: #0f2d57;
+  --tint: #eef2f8;
+  --hair: #c9d6ea;
+  --font: "Commissioner", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --ease: cubic-bezier(.77,0,.18,1);
+  --spring: cubic-bezier(.34,1.56,.64,1);
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 300 16px/1.5 var(--font);
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+svg * { transform-box: fill-box; transform-origin: center; }
+
+/* ---------- slides ---------- */
+.viewport { position: fixed; inset: 0; overflow: hidden; }
+.track { height: 100%; transition: transform 1s var(--ease); will-change: transform; }
+.slide {
+  height: 100%;
+  position: relative;
+  display: grid;
+  align-items: center;
+  padding-block: 76px 140px;
+  padding-left: max(96px, env(safe-area-inset-left, 0px));
+  padding-right: max(96px, env(safe-area-inset-right, 0px));
+  overflow: hidden;
+}
+.slide > * { transition: opacity .7s ease .2s, transform .9s var(--ease) .1s; }
+.slide:not(.is-active) > * { opacity: 0; transform: translateY(24px); }
+.slide:not(.is-active) * { animation-play-state: paused !important; }
+
+/* ---------- chrome ---------- */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
+  padding-left: max(96px, env(safe-area-inset-left, 0px));
+  padding-right: max(96px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
+}
+.brand { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 11px; letter-spacing: .24em; text-transform: uppercase; white-space: nowrap; }
+.brand svg { height: 15px; width: auto; fill: var(--blue); display: block; }
+.brand i { width: 1px; height: 14px; background: var(--line); }
+.counter { font-size: 12px; letter-spacing: .14em; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.counter b { font-weight: 400; color: var(--text); }
+
+.menu-btn {
+  position: fixed; z-index: 30; left: max(0px, env(safe-area-inset-left, 0px)); top: 50%;
+  transform: translateY(-50%);
+  border: 1px solid var(--line); border-left: 0; background: var(--bg); color: var(--blue);
+  font: 400 11px/1 var(--font); letter-spacing: .28em; text-transform: uppercase;
+  padding: 22px 13px; cursor: pointer; border-radius: 0 14px 14px 0;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  transition: background .3s, color .3s, padding .3s;
+}
+.menu-btn span { writing-mode: vertical-rl; transform: rotate(180deg); }
+.menu-btn svg { width: 14px; height: 14px; }
+.menu-btn:hover, .menu-btn:focus-visible { background: var(--blue); color: #fff; outline: none; padding-left: 17px; }
+
+.drawer {
+  position: fixed; z-index: 40; top: 0; bottom: 0; left: 0;
+  width: min(440px, 92vw);
+  background: var(--bg); border-right: 1px solid var(--line);
+  transform: translateX(-104%); transition: transform .6s var(--ease), box-shadow .6s;
+  display: flex; flex-direction: column;
+  padding-top: calc(26px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(26px, env(safe-area-inset-left, 0px));
+  padding-right: 22px;
+}
+.drawer.open { transform: translateX(0); box-shadow: 24px 0 60px rgba(15,45,87,.08); }
+.drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.drawer-head h2 { font: 300 26px/1 var(--font); margin: 0; color: var(--text); }
+.close {
+  border: 1px solid var(--line); background: none; color: var(--blue); width: 38px; height: 38px; border-radius: 50%;
+  font: 300 20px/1 var(--font); cursor: pointer; transition: background .25s, color .25s;
+}
+.close:hover, .close:focus-visible { background: var(--blue); color: #fff; outline: none; }
+.toc { overflow-y: auto; flex: 1; margin: 0 -10px; padding: 0 10px; overscroll-behavior: contain; }
+.toc-group { padding: 14px 0 10px; border-top: 1px solid var(--line); }
+.toc-person { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.toc-person .ava { width: 38px; height: 38px; }
+.toc-person b { font-weight: 400; font-size: 15px; color: var(--text); display: block; line-height: 1.2; }
+.toc-person small { display: block; font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.toc a {
+  display: grid; grid-template-columns: 30px 1fr; gap: 6px;
+  padding: 7px 10px; margin: 0 -10px; border-radius: 10px;
+  color: var(--text); text-decoration: none; font-size: 13.5px; line-height: 1.4;
+  transition: background .2s;
+}
+.toc a span:first-child { font-variant-numeric: tabular-nums; color: var(--muted); }
+.toc a:hover, .toc a:focus-visible { background: var(--tint); outline: none; }
+.toc a.current { background: var(--tint); }
+.toc a.current span:first-child { color: var(--blue); font-weight: 500; }
+.scrim { position: fixed; inset: 0; z-index: 35; background: rgba(15,45,87,.12); opacity: 0; pointer-events: none; transition: opacity .4s; }
+.scrim.on { opacity: 1; pointer-events: auto; }
+
+.meter {
+  position: fixed; z-index: 20; top: 50%; transform: translateY(-50%);
+  right: max(30px, calc(env(safe-area-inset-right, 0px) + 22px));
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--muted);
+}
+.meter-track { width: 2px; height: 130px; background: var(--line); position: relative; overflow: hidden; border-radius: 2px; }
+.meter-fill { position: absolute; left: 0; right: 0; top: 0; height: 100%; background: var(--blue); transform-origin: top; transform: scaleY(0); transition: transform .12s linear; }
+.meter-fill.up { transform-origin: bottom; }
+.meter small { writing-mode: vertical-rl; }
+.meter .arrow { color: var(--blue); font-size: 14px; animation: nudge 1.8s ease-in-out infinite; }
+@keyframes nudge { 0%,100% { transform: translateY(0) } 50% { transform: translateY(5px) } }
+
+/* caption: centered, low, lots of air */
+.cap {
+  position: absolute; left: 0; right: 0; bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  display: flex; justify-content: center; align-items: center; gap: 16px;
+  font-size: 11.5px; line-height: 1; letter-spacing: .34em; text-transform: uppercase; color: var(--muted);
+  white-space: nowrap; pointer-events: none;
+}
+.cap::before, .cap::after { content: ""; width: 32px; height: 1px; background: var(--hair); }
+
+/* ---------- cover ---------- */
+.cover-slide { justify-items: center; text-align: center; padding-block: 64px 48px; }
+.cover { display: grid; justify-items: center; gap: 0; width: 100%; }
+.lockup { display: flex; align-items: center; gap: clamp(16px, 2.2vw, 28px); }
+.logo { height: clamp(44px, 6vw, 70px); width: auto; display: block; fill: var(--blue); overflow: visible; }
+.lockup .sep { width: 1px; align-self: stretch; background: var(--hair); transform-origin: top; }
+.lesson { font: 200 clamp(28px, 4.2vw, 50px)/1 var(--font); letter-spacing: .01em; color: var(--text); white-space: nowrap; }
+.lesson b { font-weight: 300; color: var(--blue); }
+.cover-sub { margin: 18px 0 0; font-size: 11.5px; letter-spacing: .34em; text-transform: uppercase; color: var(--muted); }
+.cover-hero { width: min(470px, 86vw); aspect-ratio: 360 / 330; margin-top: clamp(4px, 1.5vh, 18px); max-height: 54vh; }
+.cover-hero svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.is-active .logo .mark circle { animation: dotIn .7s var(--spring) backwards, dotWave 7s ease-in-out infinite; }
+@keyframes dotIn { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes dotWave { 0%, 82%, 100% { transform: scale(1); } 88% { transform: scale(.45); } 94% { transform: scale(1.12); } }
+.is-active .logo .wm { animation: wmIn 1s var(--ease) .55s backwards; }
+@keyframes wmIn { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
+.is-active .lockup .sep { animation: sepIn .8s var(--ease) .8s backwards; }
+@keyframes sepIn { from { transform: scaleY(0); } to { transform: none; } }
+.is-active .lesson { animation: lessonIn 1s var(--ease) .9s backwards; }
+@keyframes lessonIn { from { opacity: 0; transform: translateX(24px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+.is-active .cover-sub { animation: fadeUp .9s ease 1.3s backwards; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ---------- rules ---------- */
+.rules { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(24px, 5vw, 96px); align-items: center; max-width: 1240px; margin: 0 auto; width: 100%; }
+.eyebrow { font-size: 11.5px; letter-spacing: .32em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; display: flex; gap: 14px; align-items: center; }
+.eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--blue); }
+.h1 { font: 200 clamp(32px, 3.6vw, 54px)/1.14 var(--font); margin: 0 0 30px; color: var(--text); text-wrap: balance; letter-spacing: -.005em; }
+.h1 em { font-style: normal; font-weight: 400; color: var(--blue); }
+.steps { display: grid; gap: 18px; margin: 0; padding: 0; list-style: none; }
+.steps li { display: grid; grid-template-columns: 38px 1fr; gap: 16px; align-items: start; font-size: 15px; line-height: 1.5; max-width: 52ch; color: var(--muted); }
+.steps li b { display: block; font-weight: 400; font-size: 16px; color: var(--text); margin-bottom: 2px; }
+.steps .n { width: 38px; height: 38px; border: 1px solid var(--blue); border-radius: 50%; display: grid; place-items: center; font-size: 15px; font-weight: 400; color: var(--blue); }
+.steps li.light .n { border-style: dashed; border-color: var(--hair); }
+.is-active .steps li { animation: fadeUp .8s var(--ease) backwards; }
+.is-active .steps li:nth-child(1) { animation-delay: .35s }
+.is-active .steps li:nth-child(2) { animation-delay: .5s }
+.is-active .steps li:nth-child(3) { animation-delay: .65s }
+
+/* ---------- question slides ---------- */
+.q-grid {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(24px, 5vw, 96px); align-items: center; max-width: 1240px; width: 100%; margin: 0 auto;
+}
+.q-meta { display: flex; align-items: baseline; gap: 16px; margin-bottom: 26px; }
+.q-num { font: 200 clamp(48px, 5vw, 72px)/.9 var(--font); color: var(--blue); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.q-who { font-size: 11.5px; letter-spacing: .26em; text-transform: uppercase; color: var(--muted); }
+.q-who b { font-weight: 400; color: var(--text); }
+.msg { display: flex; gap: 16px; align-items: flex-end; }
+.ava {
+  flex: none; width: 64px; height: 64px; border-radius: 50%;
+  background: var(--tint); overflow: hidden; display: block; position: relative;
+  box-shadow: inset 0 0 0 1px rgba(22,63,121,.08);
+}
+.ava svg { width: 100%; height: 100%; display: block; }
+.ava { display: grid; place-items: center; }
+.ava span { font-weight: 300; font-size: 26px; color: var(--blue); line-height: 1; }
+.toc-person .ava span { font-size: 16px; }
+.p-ava .ava { width: clamp(140px, 16vw, 200px); height: clamp(140px, 16vw, 200px); }
+.p-ava .ava span { font-size: clamp(60px, 7vw, 92px); font-weight: 200; }
+.is-active .p-ava .ava { animation: avaIn .9s var(--spring) .1s backwards; }
+.bubble {
+  position: relative; background: var(--tint); border-radius: 22px 22px 22px 6px;
+  padding: 16px 22px 18px; min-width: 0; max-width: 34em;
+}
+.bubble .who { display: block; font-size: 13px; font-weight: 400; color: var(--blue); margin-bottom: 6px; }
+.bubble .q { margin: 0; font: 300 clamp(18px, 1.6vw, 24px)/1.42 var(--font); color: var(--text); text-wrap: pretty; min-height: 1.42em; }
+.bubble .q .caret { display: inline-block; width: 2px; height: 1.05em; background: var(--blue); vertical-align: -.16em; margin-left: 2px; animation: caret .8s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0 } }
+.typing { display: inline-flex; gap: 5px; padding: 8px 0 4px; }
+.typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); animation: tdot 1.1s ease-in-out infinite; }
+.typing i:nth-child(2) { animation-delay: .15s } .typing i:nth-child(3) { animation-delay: .3s }
+@keyframes tdot { 0%,60%,100% { transform: translateY(0); opacity: .3 } 30% { transform: translateY(-5px); opacity: 1 } }
+.is-active .msg .ava { animation: avaIn .7s var(--spring) .2s backwards; }
+@keyframes avaIn { from { transform: scale(.3); opacity: 0; } to { transform: none; opacity: 1; } }
+.is-active .msg .bubble { animation: bubIn .6s var(--spring) .35s backwards; transform-origin: 0 100%; }
+@keyframes bubIn { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.scene { width: 100%; max-width: 520px; justify-self: center; aspect-ratio: 4 / 3; max-height: calc(100vh - 260px); }
+.scene svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+/* ---------- person intro ---------- */
+.person-slide .p-wrap { display: grid; grid-template-columns: auto auto; align-items: center; justify-content: center; gap: clamp(16px, 4vw, 64px); }
+.p-hero { width: clamp(220px, 26vw, 340px); aspect-ratio: 300 / 340; max-height: 62vh; }
+.p-hero svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.p-text { display: grid; gap: 10px; }
+.p-kicker { font-size: 11.5px; letter-spacing: .32em; text-transform: uppercase; color: var(--muted); display: flex; gap: 14px; align-items: center; }
+.p-kicker::before { content: ""; width: 28px; height: 1px; background: var(--blue); }
+.p-name { font: 200 clamp(48px, 6.4vw, 92px)/1 var(--font); margin: 0; color: var(--text); letter-spacing: -.01em; }
+.p-role { font-size: 15px; color: var(--muted); }
+.p-count { font-size: 13px; color: var(--blue); }
+.is-active .p-text > * { animation: fadeUp .8s var(--ease) backwards; }
+.is-active .p-text > *:nth-child(2) { animation-delay: .15s }
+.is-active .p-text > *:nth-child(3) { animation-delay: .3s }
+.is-active .p-text > *:nth-child(4) { animation-delay: .45s }
+
+/* ---------- finale ---------- */
+.center { display: grid; justify-items: center; text-align: center; gap: 8px; }
+.end-hero { width: min(560px, 86vw); aspect-ratio: 480 / 340; max-height: 54vh; }
+.end-hero svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.center .big { font: 200 clamp(30px, 3.6vw, 50px)/1.1 var(--font); margin: 0; color: var(--text); }
+.center p { margin: 0; font-size: 15px; color: var(--muted); }
+.loading { display: inline-flex; gap: 8px; margin-top: 10px; }
+.loading i { width: 7px; height: 7px; background: var(--blue); border-radius: 50%; animation: tdot 1.4s ease-in-out infinite; }
+.loading i:nth-child(2) { animation-delay: .2s } .loading i:nth-child(3) { animation-delay: .4s }
+
+/* ---------- props (scene line art) ---------- */
+.ink { fill: #fff; stroke: var(--blue); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.ln { fill: none; stroke: var(--blue); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.thin { fill: none; stroke: var(--blue); stroke-width: 1.4; stroke-linecap: round; }
+.solid { fill: var(--blue); stroke: var(--blue); stroke-width: 2.4; stroke-linejoin: round; }
+.grey { fill: var(--tint); stroke: var(--blue); stroke-width: 2.4; stroke-linejoin: round; }
+.veil { fill: var(--tint); }
+.lbl { font: 500 12.5px var(--font); fill: var(--blue); letter-spacing: .16em; text-transform: uppercase; }
+.lbl-s { font: 400 11px var(--font); fill: var(--muted); letter-spacing: .08em; }
+.lbl-inv { font: 500 12.5px var(--font); fill: #fff; letter-spacing: .14em; text-transform: uppercase; }
+.qbig { font: 200 230px var(--font); fill: var(--blue); }
+.qsmall { font: 300 30px var(--font); fill: var(--blue); }
+
+.bob { animation: bob 2.6s ease-in-out infinite; }
+@keyframes bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }
+.blink { animation: blink 4s infinite; }
+@keyframes blink { 0%,94%,100% { transform: scaleY(1) } 97% { transform: scaleY(.1) } }
+.spin { animation: spin 14s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg) } }
+.pop { animation: pop .6s var(--spring) both; }
+@keyframes pop { from { transform: scale(0); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+.popl { animation: popl 3.6s var(--ease) infinite both; }
+@keyframes popl { 0% { transform: scale(0); opacity: 0 } 12%,80% { transform: scale(1); opacity: 1 } 92%,100% { transform: scale(0); opacity: 0 } }
+.draw { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 3.2s ease-in-out infinite; }
+@keyframes draw { 0% { stroke-dashoffset: 400 } 45%,85% { stroke-dashoffset: 0 } 100% { stroke-dashoffset: 0; opacity: 0 } }
+.drawonce { stroke-dasharray: 600; stroke-dashoffset: 600; animation: drawonce 1.6s ease-out .6s forwards; }
+@keyframes drawonce { to { stroke-dashoffset: 0 } }
+.wipe { transform-origin: 100% 50%; animation: wipe 4s var(--ease) infinite; }
+@keyframes wipe { 0%,15% { transform: scaleX(1) } 55%,85% { transform: scaleX(0) } 100% { transform: scaleX(1) } }
+.twinkle { animation: twinkle 1.8s ease-in-out infinite; }
+@keyframes twinkle { 0%,100% { transform: scale(.3) rotate(0); opacity: 0 } 50% { transform: scale(1) rotate(45deg); opacity: 1 } }
+.brush { animation: brush 3s ease-in-out infinite; }
+@keyframes brush { 0%,100% { transform: translate(0,0) } 25% { transform: translate(40px,-14px) } 50% { transform: translate(10px,18px) } 75% { transform: translate(46px,22px) } }
+.swapA { animation: swapA 3s steps(1) infinite; } .swapB { animation: swapB 3s steps(1) infinite; }
+@keyframes swapA { 0%,49% { opacity: 1 } 50%,100% { opacity: 0 } }
+@keyframes swapB { 0%,49% { opacity: 0 } 50%,100% { opacity: 1 } }
+.fadeA { animation: fadeA 3.4s ease-in-out infinite; } .fadeB { animation: fadeB 3.4s ease-in-out infinite; }
+@keyframes fadeA { 0%,35% { opacity: 1 } 50%,85% { opacity: 0 } 100% { opacity: 1 } }
+@keyframes fadeB { 0%,35% { opacity: 0 } 50%,85% { opacity: 1 } 100% { opacity: 0 } }
+.slideX { animation: slideX 2.4s linear infinite; }
+@keyframes slideX { to { transform: translateX(-80px) } }
+.needle { transform-origin: 50% 100%; animation: needle 3.2s var(--ease) infinite; }
+@keyframes needle { 0%,15% { transform: rotate(-70deg) } 55%,85% { transform: rotate(60deg) } 100% { transform: rotate(-70deg) } }
+.shrink { animation: shrink 3.2s var(--ease) infinite; transform-origin: 50% 100%; }
+@keyframes shrink { 0%,15% { transform: scale(1) } 55%,85% { transform: scale(.45) } 100% { transform: scale(1) } }
+.plug { animation: plug 2.6s var(--ease) infinite; }
+@keyframes plug { 0%,15% { transform: translateX(-34px) } 45%,80% { transform: translateX(0) } 100% { transform: translateX(-34px) } }
+.tilt { transform-origin: 50% 50%; animation: tilt 3.4s ease-in-out infinite; }
+@keyframes tilt { 0%,100% { transform: rotate(-9deg) } 50% { transform: rotate(9deg) } }
+.counterY { animation: counterY 3.4s ease-in-out infinite; }
+@keyframes counterY { 0%,100% { transform: translateY(-14px) } 50% { transform: translateY(14px) } }
+.counterY2 { animation: counterY2 3.4s ease-in-out infinite; }
+@keyframes counterY2 { 0%,100% { transform: translateY(14px) } 50% { transform: translateY(-14px) } }
+.flip { transform-origin: 0% 50%; animation: flip 2.4s var(--ease) infinite; }
+@keyframes flip { 0%,20% { transform: scaleX(1) } 60%,100% { transform: scaleX(-1) } }
+.growX { transform-origin: 0% 50%; animation: growX 3.6s var(--ease) infinite both; }
+@keyframes growX { 0% { transform: scaleX(0) } 30%,85% { transform: scaleX(1) } 100% { transform: scaleX(1); opacity: 0 } }
+.flow { stroke-dasharray: 5 10; animation: flow .9s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -15 } }
+.pulse { animation: pulse 1.8s ease-out infinite; }
+@keyframes pulse { 0% { transform: scale(.6); opacity: 1 } 100% { transform: scale(1.9); opacity: 0 } }
+.climb { animation: climb 3.2s var(--ease) .9s both; }
+@keyframes climb { 0%,8% { transform: translateY(0) } 28%,36% { transform: translateY(-38px) } 60%,68% { transform: translateY(-76px) } 92%,100% { transform: translateY(-114px) } }
+.flyin1 { animation: flyin1 3.6s var(--ease) infinite; } .flyin2 { animation: flyin2 3.6s var(--ease) infinite; } .flyin3 { animation: flyin3 3.6s var(--ease) infinite; }
+@keyframes flyin1 { 0%,10% { transform: translate(-90px,-60px) rotate(-30deg); opacity: 0 } 35%,85% { transform: none; opacity: 1 } 100% { opacity: 0 } }
+@keyframes flyin2 { 0%,25% { transform: translate(90px,-70px) rotate(30deg); opacity: 0 } 50%,85% { transform: none; opacity: 1 } 100% { opacity: 0 } }
+@keyframes flyin3 { 0%,40% { transform: translate(0,80px); opacity: 0 } 65%,85% { transform: none; opacity: 1 } 100% { opacity: 0 } }
+.seek { animation: seek 5s var(--ease) infinite; }
+@keyframes seek { 0% { transform: translate(-90px,-40px) } 25% { transform: translate(50px,-50px) } 50% { transform: translate(-40px,40px) } 70%,95% { transform: translate(0,0) } 100% { transform: translate(-90px,-40px) } }
+.fly { animation: fly 3.2s var(--ease) infinite; }
+@keyframes fly { 0% { transform: translate(0,0) scale(1); opacity: 1 } 70% { transform: translate(150px,-95px) scale(.55); opacity: 1 } 85%,100% { transform: translate(150px,-95px) scale(.55); opacity: 0 } }
+.strike { stroke-dasharray: 260; stroke-dashoffset: 260; animation: strike 2.8s ease-in-out infinite; }
+@keyframes strike { 0%,20% { stroke-dashoffset: 260 } 50%,90% { stroke-dashoffset: 0 } 100% { stroke-dashoffset: 0; opacity: 0 } }
+.lid { transform-origin: 50% 50%; animation: lid 3s ease-in-out infinite; }
+@keyframes lid { 0%,40%,100% { transform: scaleY(1) } 45%,55% { transform: scaleY(.08) } }
+.rise { animation: rise 4.5s ease-in-out infinite both; }
+@keyframes rise { 0% { transform: translateY(30px); opacity: 0 } 18%, 72% { opacity: 1 } 100% { transform: translateY(-120px); opacity: 0 } }
+.wobble { animation: wobble 3.4s ease-in-out infinite; }
+@keyframes wobble { 0%,100% { transform: rotate(-5deg) translateY(0) } 50% { transform: rotate(5deg) translateY(-10px) } }
+.ring { animation: ring 2.4s ease-out infinite; }
+@keyframes ring { 0% { transform: scale(.7); opacity: .9 } 100% { transform: scale(1.7); opacity: 0 } }
+
+@media (max-width: 860px) {
+  .slide { padding-block: 64px 130px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .topbar { padding-top: calc(18px + env(safe-area-inset-top, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .brand { gap: 9px; font-size: 10px; letter-spacing: .18em; }
+  .brand svg { height: 13px; }
+  .q-grid, .rules { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .scene { max-width: 330px; order: -1; max-height: 34vh; }
+  .rules .scene { max-height: 30vh; }
+  .q-meta { margin-bottom: 12px; gap: 12px; }
+  .q-num { font-size: 40px; }
+  .q-who { font-size: 10px; letter-spacing: .2em; }
+  .msg { gap: 10px; }
+  .ava { width: 44px; height: 44px; }
+  .bubble { padding: 12px 16px 14px; border-radius: 18px 18px 18px 5px; }
+  .bubble .q { font-size: 17px; }
+  .h1 { font-size: 28px; margin-bottom: 16px; }
+  .steps { gap: 10px; }
+  .steps li { font-size: 13px; grid-template-columns: 30px 1fr; gap: 12px; }
+  .steps li b { font-size: 14.5px; }
+  .steps .n { width: 30px; height: 30px; font-size: 13px; }
+  .eyebrow { margin-bottom: 12px; }
+  .meter { display: none; }
+  .menu-btn {
+    top: auto; transform: none; left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+    border: 1px solid var(--line); border-radius: 999px; padding: 0; width: 46px; height: 46px; justify-content: center;
+  }
+  .menu-btn span { display: none; }
+  .menu-btn svg { width: 17px; height: 17px; }
+  .menu-btn:hover, .menu-btn:focus-visible { padding: 0; }
+  .cap { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); font-size: 10px; letter-spacing: .26em; gap: 10px; padding-left: 70px; padding-right: 16px; justify-content: center; }
+  .cap::before, .cap::after { width: 16px; }
+  .person-slide .p-wrap { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: 8px; }
+  .p-hero { width: min(240px, 64vw); max-height: 44vh; }
+  .p-kicker { justify-content: center; }
+  .p-kicker::before { display: none; }
+  .p-name { font-size: 46px; }
+  .cover-hero { max-height: 42vh; }
+  .lesson { font-size: 28px; }
+  .logo { height: 44px; }
+  .cover-sub { font-size: 10px; letter-spacing: .26em; }
+  .end-hero { max-height: 40vh; }
+}
+@media (max-height: 640px) and (min-width: 861px) {
+  .slide { padding-block: 64px 84px; }
+  .cap { bottom: 64px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: .2s !important; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#163F79" stroke-width="1.3"/></pattern>
+    <symbol id="dyerW" viewBox="595 459 1323 666"><path fill-rule="evenodd" d="M 595.2 459.849 L 704.841 459.849 C 855.931 459.849 966.05 576.761 966.05 725.173 C 966.05 870.353 857.3 989.229 704.841 989.229 L 595.2 989.229 Z M 620.1 484.695 L 709.296 484.695 C 836.742 484.695 941.662 587.297 941.662 724.191 C 941.662 865.333 833.101 964.578 709.296 964.578 L 620.1 964.578 Z"/><path fill-rule="evenodd" d="M 1012.3 616.1 L 1037.2 616.1 L 1183.8 932.3 L 1310.5 616.1 L 1333.6 616.1 L 1164.5 1039.2 C 1147.1 1082.607 1124.415 1124.909 1067.426 1124.909 C 1062.92 1124.909 1047.26 1120.68 1046.3 1120.4 L 1046.3 1095.6 C 1064.534 1100.918 1059.426 1100.11 1071.802 1100.11 C 1101.145 1100.11 1122.994 1083.527 1139.5 1042.35 L 1171.7 962.5 Z"/><path fill-rule="evenodd" d="M 1687 800 C 1687 639.844 1560.257 612.074 1526.325 612.074 C 1417.952 612.074 1349.138 704.926 1349.138 799.318 C 1349.138 927.942 1447.173 990.735 1517.551 990.735 C 1572.953 990.735 1641.2 973.3 1671.382 896 L 1650.946 896 C 1605.26 958.781 1551.13 966.99 1525.943 966.99 C 1434.088 966.99 1378.04 889.899 1373.088 811 L 1687 811.1 Z M 1373.191 788 C 1378.739 717.277 1434.064 636.454 1522.24 636.454 C 1578.375 636.454 1656.781 680.099 1662.203 788 Z"/><path fill-rule="evenodd" d="M 1751.3 618 L 1771 618 L 1774.3 690.8 C 1783.18 690.8 1809.807 614.408 1894.756 614.408 L 1917.9 614.408 L 1917.9 638.977 L 1890.51 638.977 C 1850.269 638.977 1776.175 675.519 1776.175 770.819 L 1775.8 989 L 1751.3 989 Z"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <span class="brand"><svg viewBox="595 459 1323 666" role="img" aria-label="Dyer"><use href="#dyerW" x="595" y="459" width="1323" height="666"/></svg><i></i><span>AI Lesson 01</span></span>
+  <span class="counter" id="counter"></span>
+</header>
+<button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="drawer" aria-label="Открыть список вопросов">
+  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span>Вопросы</span>
+</button>
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="Вопросы">
+  <div class="drawer-head"><h2>Вопросы</h2><button class="close" id="closeBtn" aria-label="Закрыть меню">×</button></div>
+  <div class="toc" id="toc"></div>
+</nav>
+<div class="meter" aria-hidden="true">
+  <span class="arrow" id="meterArrow">↓</span>
+  <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
+  <small>крути до конца</small>
+</div>
+
+<main class="viewport"><div class="track" id="track"></div></main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- people & questions (from the colleagues' sheet) ---------- */
+  const MARK = [[285.687,101.238,16.575],[333.985,101.185,16.565],[237.348,101.387,10.843],[382.122,101.333,10.818],[189.044,114.175,6.632],[430.788,114.061,6.684],[237.45,149.449,13.603],[285.662,149.367,13.629],[333.961,149.373,13.667],[430.818,149.447,13.597],[189.006,149.611,10.78],[382.071,149.624,10.845],[140.794,149.293,6.742],[478.604,149.398,6.686],[237.424,197.521,16.519],[285.602,197.483,16.553],[382.267,197.51,16.567],[140.755,197.51,13.607],[189.107,197.511,13.598],[478.936,197.56,13.696],[333.784,197.322,10.821],[430.736,197.325,10.767],[105.166,197.426,6.799],[514.328,197.431,6.583],[140.799,245.991,16.473],[478.911,245.984,13.717],[285.45,246.035,10.81],[526.935,245.99,10.993],[92.305,246.09,10.734],[188.906,245.995,10.737],[237.304,246.045,10.763],[333.816,246.031,10.751],[382.123,245.991,10.777],[430.627,245.996,10.734],[92.469,294.254,16.523],[140.743,294.267,16.478],[237.486,294.298,16.499],[382.24,294.228,16.551],[430.777,294.252,16.504],[527.141,294.244,16.526],[333.963,294.292,13.654],[478.937,294.296,13.679],[188.962,294.083,10.811],[285.423,294.158,10.802],[92.465,342.689,16.478],[140.797,342.685,16.484],[527.05,342.69,16.553],[189.032,342.634,13.597],[333.959,342.622,13.656],[478.938,342.633,13.686],[285.536,342.534,10.763],[382.11,342.541,10.77],[430.631,342.542,10.729],[237.348,342.517,10.686],[140.716,390.893,20.82],[189.063,390.935,16.503],[285.566,390.881,16.575],[430.784,390.937,16.496],[237.474,390.976,13.541],[333.956,390.968,13.66],[92.383,390.722,10.806],[382.069,390.781,10.814],[478.63,390.806,10.945],[526.975,390.798,10.936],[189.04,439.49,20.796],[140.665,439.486,16.521],[237.432,439.504,16.513],[285.602,439.542,16.551],[333.961,439.45,13.663],[382.24,439.446,13.686],[430.74,439.623,10.798],[478.626,439.61,10.937],[105.116,439.503,6.74],[514.369,439.48,6.641],[237.5,487.446,20.8],[188.988,487.481,16.55],[285.619,487.502,16.575],[333.929,487.57,16.57],[382.274,487.571,16.568],[430.703,487.485,16.546],[140.024,487.505,6.577],[478.608,487.615,6.682],[189.053,522.871,6.633],[430.782,522.863,6.637],[285.622,535.854,16.578],[333.987,535.851,16.571],[237.309,535.687,10.806],[382.109,535.614,10.852]];
+  const PEOPLE = {
+    anna:  { name: "Анна", role: "Дизайнеры · визуализации" },
+    anast: { name: "Анастасия", role: "Дизайнеры" },
+    yana:  { name: "Яна", role: "Дизайнеры · Revit + MCP" },
+    nast:  { name: "Анастасия", role: "Архитекторы" },
+    sec:   { name: "Безопасность", role: "Вопросы без имени" }
+  };
+  const Q = [
+    ["anna", "Как я могу с помощью ИИ улучшать готовый рендер?", "render", "Готовый рендер"],
+    ["anna", "Могу ли я править отдельные объекты и материалы на рендере?", "inpaint", "Правка объектов"],
+    ["anna", "Может ли ИИ создавать текстуры и карты по референсу?", "texture", "Текстуры по рефу"],
+    ["anna", "Может ли ИИ улучшать разрешение и качество текстур?", "upscale", "Разрешение и качество"],
+    ["anna", "Может ли ИИ писать скрипты для 3ds Max по запросу?", "script", "Скрипты для 3ds Max"],
+    ["anna", "Как ИИ может мне помочь в работе внутри самой программы 3ds Max?", "max", "Внутри 3ds Max"],
+    ["anna", "Может ли ИИ помочь с оптимизацией сцены?", "optimize", "Оптимизация сцены"],
+    ["anna", "Может ли ИИ сделать анимацию из статичного рендера?", "film", "Анимация из рендера"],
+    ["anast", "Что представляет из себя Claude, как его использовать, какая логика взаимодействия?", "claude", "Что такое Claude"],
+    ["anast", "Что использовать и как для создания концептуальных визуализаций интерьера?", "concept", "Концепт-визуализации"],
+    ["anast", "Как подключить и как использовать ИИ для Archicad?", "archicad", "ИИ и Archicad"],
+    ["anast", "Какая связка работает лучше: Revit + ИИ или Archicad + ИИ? Нужно ли для облегчения работы учиться Revit?", "scales", "Revit или Archicad"],
+    ["anast", "Возможно ли создание узлов, раскладок плитки, отделки в Archicad + ИИ?", "tiles", "Узлы, плитка, отделка"],
+    ["anast", "Как создать альбом концепции в связке Archicad + InDesign + ИИ?", "album", "Альбом концепции"],
+    ["anast", "Возможно ли создавать сводные таблицы спецификаций в связке Google Таблицы + ИИ по заданным шаблонам?", "table", "Таблицы спецификаций"],
+    ["yana", "Как подключить ИИ к Revit?", "revit", "Подключить к Revit"],
+    ["yana", "Как корректно писать промпт?", "prompt", "Как писать промпт"],
+    ["yana", "Можно давать абсолютно любые задачи, которые я сама могу придумать, или есть технические ограничения?", "limits", "Любые задачи?"],
+    ["yana", "Может ли ИИ настроить графику шаблонов чертежей?", "graphics", "Графика шаблонов"],
+    ["yana", "Как создавать нужные мне семейства?", "family", "Семейства"],
+    ["nast", "Можно ли проанализировать и структурировать большой объём информации? Мне нужно сверить много узлов и чертежей РД и DD. Может ли Claude найти в PDF план, где есть ось В/1?", "axis", "Поиск по PDF, ось В/1"],
+    ["sec", "Можно ли загружать чертежи и договоры? Куда они уходят?", "upload", "Куда уходят файлы"],
+    ["sec", "Что точно нельзя отправлять в ИИ?", "forbidden", "Что нельзя отправлять"],
+    ["sec", "Видит ли кто-то мои переписки с ИИ?", "eye", "Кто видит переписку"]
+  ];
+
+  /* avatars: initials in a circle, a lock for the anonymous security questions */
+  const LOCK = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="11" y="18" width="18" height="14" rx="3" fill="none" stroke="#163F79" stroke-width="1.8"/><path d="M15 18v-4a5 5 0 0 1 10 0v4" fill="none" stroke="#163F79" stroke-width="1.8"/><circle cx="20" cy="25" r="1.8" fill="#163F79"/></svg>';
+  const avaHtml = (pk) => '<div class="ava">' + (pk === "sec" ? LOCK : '<span>' + PEOPLE[pk].name[0] + '</span>') + '</div>';
+
+  /* ---------- scenes: one situation per question ---------- */
+  const S = (inner) => '<svg viewBox="0 0 480 340" role="img" aria-hidden="true">' + inner + '</svg>';
+  const P = (inner, tx, ty, s) => '<g transform="translate(' + (tx === undefined ? 48 : tx) + ' ' + (ty === undefined ? 40 : ty) + ') scale(' + (s || 1.08) + ')">' + inner + '</g>';
+  const M = () => '';
+  const star = (x, y, d) => '<g transform="translate(' + x + ' ' + y + ')"><path class="solid twinkle" style="animation-delay:' + (d || 0) + 's" d="M0 -9 L2.4 -2.4 L9 0 L2.4 2.4 L0 9 L-2.4 2.4 L-9 0 L-2.4 -2.4Z"/></g>';
+  const B = "#163F79";
+
+  const SCENES = {
+    render: (n) => S(P('<g transform="translate(165 50)"><rect class="ink" x="0" y="0" width="200" height="150" rx="4"/>' +
+      '<path class="ln" d="M0 112 L200 112 M40 112 L70 70 L130 70 L160 112 M70 70 L70 22 L130 22 L130 70"/>' +
+      '<rect class="grey" x="86" y="34" width="28" height="30"/><path class="thin" d="M100 34 V64 M86 49 H114"/>' +
+      '<rect x="3" y="3" width="194" height="144" class="veil wipe" opacity=".85"/><path class="thin wipe" d="M20 130 L60 96 M60 136 L120 84 M110 140 L180 80" opacity=".6"/></g>' +
+      star(352, 44, 0) + star(372, 120, .6) + star(190, 210, 1.1) +
+      '<text x="265" y="228" class="lbl" text-anchor="middle">было → стало</text>') + M("present", n)),
+    inpaint: (n) => S(P('<g transform="translate(160 40)"><rect class="ink" x="0" y="0" width="210" height="170" rx="4"/><path class="ln" d="M0 130 H210"/>' +
+      '<g class="swapA"><path class="ink" d="M70 128 V86 Q70 70 86 70 H124 Q140 70 140 86 V128"/><rect class="ink" x="62" y="96" width="86" height="22" rx="8"/></g>' +
+      '<g class="swapB"><rect class="grey" x="80" y="90" width="50" height="14" rx="4"/><path class="ln" d="M86 104 L80 128 M124 104 L130 128"/><path class="ln" d="M90 90 Q105 60 120 90"/></g>' +
+      '<g class="brush"><circle cx="78" cy="78" r="22" fill="none" stroke="' + B + '" stroke-width="2" stroke-dasharray="5 5"/></g></g>' +
+      '<text x="265" y="236" class="lbl" text-anchor="middle">выделил → заменил</text>') + M("brush", n)),
+    texture: (n) => {
+      let tiles = "";
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+        tiles += '<g transform="translate(' + (220 + c * 46) + ' ' + (60 + r * 46) + ')"><g class="pop" style="animation-delay:' + (0.6 + (r * 3 + c) * 0.12) + 's"><rect class="ink" width="46" height="46"/><path class="thin" d="M0 30 Q14 18 24 26 T46 14 M0 8 Q20 16 46 40"/></g></g>';
+      }
+      return S(P('<g transform="translate(130 82)"><rect class="ink" width="56" height="56" rx="3"/><path class="thin" d="M0 36 Q16 22 28 32 T56 18 M0 10 Q24 20 56 48"/><text x="28" y="76" class="lbl-s" text-anchor="middle">реф</text></g>' +
+        '<path class="ln flow" d="M192 110 H212"/>' + tiles + '<text x="289" y="232" class="lbl" text-anchor="middle">бесшовно</text>', 70, 40, 1) + M("present", n));
+    },
+    upscale: (n) => {
+      let px = "";
+      const on = [[1,0],[2,0],[3,0],[4,0],[0,1],[5,1],[0,2],[5,2],[0,3],[5,3],[0,4],[5,4],[1,5],[2,5],[3,5],[4,5]];
+      on.forEach(([c, r]) => { px += '<rect x="' + (c * 20) + '" y="' + (r * 20) + '" width="20" height="20" fill="' + B + '"/>'; });
+      return S(P('<g transform="translate(180 50)"><rect class="ink" x="-10" y="-10" width="140" height="140" rx="4"/>' +
+        '<g class="fadeA">' + px + '</g><g class="fadeB"><circle cx="60" cy="60" r="50" fill="none" stroke="' + B + '" stroke-width="20"/></g></g>' +
+        '<g transform="translate(330 170)"><g class="bob"><circle class="ink" r="26"/><text y="5" class="lbl" text-anchor="middle" style="letter-spacing:0">×4</text></g></g>') + M("think", n));
+    },
+    script: (n) => S(P('<rect class="ink" width="220" height="160" rx="8"/><path class="ln" d="M0 26 H220"/>' +
+      '<circle cx="16" cy="13" r="4" fill="' + B + '"/><circle cx="30" cy="13" r="4" fill="' + B + '"/>' +
+      '<text x="204" y="17" class="lbl-s" text-anchor="end">maxscript</text>' +
+      '<path class="ln draw" d="M18 50 H120"/><path class="ln draw" style="animation-delay:.3s" d="M34 74 H170"/>' +
+      '<path class="ln draw" style="animation-delay:.6s" d="M34 98 H140"/><path class="ln draw" style="animation-delay:.9s" d="M18 122 H90"/>' +
+      '<rect x="18" y="136" width="10" height="14" fill="' + B + '" class="swapA"/>', 228, 70, .98) + M("type", n)),
+    max: (n) => S(P('<g transform="translate(240 130)"><g class="spin"><path class="ink" d="M0 -70 L60 -35 L60 35 L0 70 L-60 35 L-60 -35Z"/>' +
+      '<path class="ln" d="M-60 -35 L0 0 L60 -35 M0 0 V70"/><path class="thin" d="M0 -70 V0 M-60 35 L0 0 L60 35" stroke-dasharray="4 5"/></g></g>' +
+      '<g transform="translate(330 46)"><g class="popl"><rect class="solid" width="44" height="44" rx="4"/><rect x="9" y="4" width="26" height="14" fill="#fff"/><rect x="10" y="26" width="24" height="14" rx="2" fill="#fff"/></g></g>' +
+      '<text x="352" y="114" class="lbl" text-anchor="middle">сохранись</text>') + M("thumb", n)),
+    optimize: (n) => S(P('<g transform="translate(270 168)"><path class="ink" d="M-90 0 A90 90 0 0 1 90 0Z"/><path class="thin" d="M-70 0 A70 70 0 0 1 70 0" stroke-dasharray="3 9"/>' +
+      '<g class="needle"><path class="solid" d="M-4 0 L0 -78 L4 0Z"/></g><circle class="solid" r="9"/>' +
+      '<text x="-66" y="24" class="lbl-s" text-anchor="middle">тяжело</text><text x="66" y="24" class="lbl-s" text-anchor="middle">легко</text></g>' +
+      '<g transform="translate(270 240)"><g class="shrink"><rect class="solid" x="-48" y="-30" width="96" height="30" rx="4"/><text y="-10" class="lbl-inv" text-anchor="middle">полигоны</text></g></g>') + M("thumb", n)),
+    film: (n) => {
+      let fr = "";
+      for (let i = 0; i < 6; i++) fr += '<g transform="translate(' + (i * 80) + ' 0)"><rect class="ink" x="6" y="18" width="68" height="64"/><path class="ln" d="M16 70 L40 ' + (40 + (i % 3) * 6) + ' L64 70Z"/><circle cx="' + (24 + (i % 4) * 8) + '" cy="34" r="6" fill="' + B + '"/></g>';
+      let holes = "";
+      for (let i = 0; i < 24; i++) holes += '<rect x="' + (i * 20 + 4) + '" y="4" width="10" height="8" rx="2" fill="#fff"/><rect x="' + (i * 20 + 4) + '" y="88" width="10" height="8" rx="2" fill="#fff"/>';
+      return S('<defs><clipPath id="fclip"><rect x="214" y="70" width="246" height="100"/></clipPath></defs>' +
+        '<g clip-path="url(#fclip)"><g transform="translate(214 70)"><g class="slideX"><rect x="0" y="0" width="480" height="100" fill="' + B + '"/>' + holes + fr + '</g></g></g>' +
+        '<rect x="214" y="70" width="246" height="100" fill="none" stroke="' + B + '" stroke-width="2.4"/>' +
+        '<g transform="translate(337 236)"><circle class="ink" r="26"/><path class="solid" d="M-7 -11 L12 0 L-7 11Z"/><circle r="26" fill="none" stroke="' + B + '" stroke-width="2" class="pulse"/></g>' +
+        M("wave", n));
+    },
+    claude: (n) => S('<g transform="translate(408 318)"><g class="bob" style="animation-delay:.6s">' +
+      '<path class="ln" d="M-10 -2 V-28 M10 -2 V-28"/><path class="ln" d="M-18 -2 H-4 M4 -2 H18"/>' +
+      '<rect class="ink" x="-23" y="-82" width="46" height="56" rx="12"/><path class="ln" d="M-23 -66 L-36 -44 M23 -66 L36 -44"/>' +
+      '<circle class="grey" cx="0" cy="-54" r="9"/><path class="thin" d="M-4 -54 H4 M0 -58 V-50"/>' +
+      '<rect class="ink" x="-25" y="-134" width="50" height="46" rx="15"/><path class="ln" d="M0 -134 V-146"/><circle class="solid" cx="0" cy="-150" r="4"/>' +
+      '<g class="blink"><rect x="-13" y="-118" width="7" height="11" rx="2.5" fill="' + B + '"/><rect x="6" y="-118" width="7" height="11" rx="2.5" fill="' + B + '"/></g>' +
+      '<path class="ln" d="M-7 -98 Q0 -93 7 -98"/></g><text y="20" class="lbl-s" text-anchor="middle">стажёр</text></g>' +
+      '<g transform="translate(214 92)"><g class="popl"><rect class="ink" width="104" height="32" rx="14"/><text x="52" y="20.5" class="lbl" text-anchor="middle">задача</text></g></g>' +
+      '<g transform="translate(244 142)"><g class="popl" style="animation-delay:.9s"><rect class="solid" width="112" height="32" rx="14"/><text x="56" y="20.5" class="lbl-inv" text-anchor="middle">черновик</text></g></g>' +
+      '<g transform="translate(214 192)"><g class="popl" style="animation-delay:1.8s"><rect class="ink" width="112" height="32" rx="14"/><text x="56" y="20.5" class="lbl" text-anchor="middle">проверка</text></g></g>' +
+      M("present", n)),
+    concept: (n) => S('<g transform="translate(212 96)"><rect class="ink" width="110" height="92" rx="3"/><path class="ln draw" d="M12 74 L36 38 L74 38 L98 74 M36 38 V16 H74 V38"/><text x="55" y="112" class="lbl-s" text-anchor="middle">скриншот</text></g>' +
+      '<path class="ln flow" d="M328 142 H346"/>' +
+      '<g transform="translate(352 96)"><rect class="ink" width="110" height="92" rx="3"/><rect x="2" y="2" width="106" height="54" fill="url(#hatch)" opacity=".45"/><path class="ln" d="M12 74 L36 38 L74 38 L98 74 M36 38 V16 H74 V38"/>' +
+      '<rect class="solid" x="26" y="60" width="28" height="9" rx="3"/><circle class="grey" cx="84" cy="26" r="7"/><text x="55" y="112" class="lbl-s" text-anchor="middle">концепт</text></g>' +
+      star(462, 86, .4) + star(352, 222, 1) + M("think", n)),
+    archicad: (n) => S(P('<g transform="translate(250 120)"><rect class="ink" x="20" y="-46" width="110" height="92" rx="10"/><text x="75" y="-14" class="lbl" text-anchor="middle" style="font-size:11.5px">archicad</text>' +
+      '<rect class="ink" x="8" y="-14" width="22" height="34" rx="4"/><circle cx="19" cy="-2" r="3" fill="' + B + '"/><circle cx="19" cy="9" r="3" fill="' + B + '"/>' +
+      '<g class="plug"><path class="ln" d="M-100 4 H-40"/><rect class="solid" x="-40" y="-12" width="34" height="32" rx="5"/><path class="ln" d="M-6 -2 H6 M-6 9 H6"/></g></g>' +
+      '<g transform="translate(330 196)"><g class="bob"><circle class="ink" r="20"/><text y="9" class="qsmall" text-anchor="middle" style="font-size:24px">?</text></g></g>') + M("think", n)),
+    scales: (n) => S(P('<g transform="translate(260 70)"><path class="ln" d="M0 0 V190 M-40 196 H40"/><circle class="solid" r="7"/>' +
+      '<g class="tilt"><path class="ln" d="M-110 0 H110"/></g>' +
+      '<g class="counterY2"><path class="ln" d="M-100 0 L-120 60 M-100 0 L-80 60"/><path class="ink" d="M-130 60 H-70 Q-72 82 -100 82 Q-128 82 -130 60Z"/><text x="-100" y="108" class="lbl" text-anchor="middle">revit</text></g>' +
+      '<g class="counterY"><path class="ln" d="M100 0 L80 60 M100 0 L120 60"/><path class="ink" d="M70 60 H130 Q128 82 100 82 Q72 82 70 60Z"/><text x="100" y="108" class="lbl" text-anchor="middle">archicad</text></g></g>', 66, 40, 1.02) + M("shrug", n)),
+    tiles: (n) => {
+      let t = "";
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 6; c++) {
+        const cut = c === 5 || r === 3;
+        t += '<g transform="translate(' + (150 + c * 34) + ' ' + (60 + r * 34) + ')"><rect class="pop ' + (cut ? "" : "ink") + '" ' + (cut ? 'fill="url(#hatch)" stroke="' + B + '" stroke-width="2"' : "") + ' style="animation-delay:' + (0.5 + (r * 6 + c) * 0.07) + 's" width="' + (c === 5 ? 18 : 34) + '" height="' + (r === 3 ? 18 : 34) + '"/></g>';
+      }
+      return S(P('<rect x="146" y="56" width="192" height="124" fill="none" stroke="' + B + '" stroke-width="3"/>' + t +
+        '<text x="242" y="214" class="lbl" text-anchor="middle">старт · подрезка · штуки</text>') + M("point", n));
+    },
+    album: (n) => S(P('<g transform="translate(260 60)"><path class="ink" d="M-100 10 L0 0 L0 150 L-100 160Z"/><path class="ink" d="M100 10 L0 0 L0 150 L100 160Z"/>' +
+      '<rect x="-84" y="26" width="66" height="44" class="grey"/><path class="thin" d="M-84 90 H-20 M-84 102 H-36 M-84 114 H-28"/>' +
+      '<g class="flip"><path class="ink" d="M0 0 L96 12 L96 158 L0 150Z"/><rect x="18" y="30" width="60" height="40" fill="url(#hatch)" stroke="' + B + '" stroke-width="2"/><path class="thin" d="M18 92 H76 M18 104 H60"/></g></g>') + M("present", n)),
+    table: (n) => {
+      let rows = "";
+      for (let i = 0; i < 5; i++) rows += '<g transform="translate(0 ' + (36 + i * 26) + ')"><rect class="growX" style="animation-delay:' + (i * 0.25) + 's" x="8" y="6" width="' + (90 + (i % 3) * 22) + '" height="10" rx="2" fill="' + B + '"/></g>';
+      return S(P('<g transform="translate(160 50)"><rect class="ink" width="210" height="170" rx="4"/><rect width="210" height="30" class="solid"/><text x="12" y="20" class="lbl-inv">шаблон</text>' +
+        '<path class="thin" d="M0 62 H210 M0 88 H210 M0 114 H210 M0 140 H210 M150 30 V170"/>' + rows +
+        '<text x="180" y="160" class="lbl" text-anchor="middle" style="font-size:16px">Σ</text></g>') + M("type", n));
+    },
+    revit: (n) => S(P('<g transform="translate(150 150)"><rect class="ink" x="0" y="0" width="80" height="54" rx="4"/><path class="ink" d="M-10 54 H90 L82 64 H-2Z"/><text x="40" y="32" class="lbl-s" text-anchor="middle" style="fill:' + B + '">Claude</text></g>' +
+      '<path class="ln flow" d="M230 176 C270 176 260 120 300 120"/>' +
+      '<g transform="translate(300 60)"><path class="ink" d="M0 40 L36 14 L72 40 L72 130 L0 130Z"/><path class="thin" d="M0 70 H72 M0 100 H72 M36 40 V130"/>' +
+      '<rect x="10" y="50" width="14" height="12" class="grey"/><rect x="48" y="80" width="14" height="12" class="grey"/><text x="36" y="152" class="lbl" text-anchor="middle">revit</text></g>' +
+      '<g transform="translate(300 120)"><circle r="10" fill="none" stroke="' + B + '" stroke-width="2" class="pulse"/></g>') + M("thumb", n)),
+    prompt: (n) => S(P('<path class="ink" d="M0 0 H200 V200 H0Z"/>' +
+      '<text x="16" y="34" class="lbl">1 · что сделать</text><path class="ln draw" d="M16 46 H176"/>' +
+      '<text x="16" y="78" class="lbl">2 · с чем</text><path class="ln draw" style="animation-delay:.4s" d="M16 90 H150"/>' +
+      '<text x="16" y="122" class="lbl">3 · какой результат</text><path class="ln draw" style="animation-delay:.8s" d="M16 134 H166"/>' +
+      '<text x="16" y="166" class="lbl">4 · что не трогать</text><path class="ln draw" style="animation-delay:1.2s" d="M16 178 H120"/>', 238, 56, 1.06) + M("point", n)),
+    limits: (n) => S('<g transform="translate(350 0)"><g class="pop" style="animation-delay:.9s"><rect class="ink" x="-56" y="280" width="112" height="38"/><text y="303.5" class="lbl" text-anchor="middle">знания</text></g>' +
+      '<g class="pop" style="animation-delay:1.8s"><rect class="ink" x="-56" y="242" width="112" height="38"/><text y="265.5" class="lbl" text-anchor="middle">опыт</text></g>' +
+      '<g class="pop" style="animation-delay:2.7s"><rect class="solid" x="-56" y="204" width="112" height="38"/><text y="227.5" class="lbl-inv" text-anchor="middle">точность</text></g></g>' +
+      
+      star(452, 60, 0) + star(250, 76, .7) +
+      '<text x="40" y="150" class="lbl" style="font-size:13px">потолок —</text><text x="40" y="172" class="lbl" style="font-size:13px">твои знания</text>' +
+      '<path class="ln" d="M40 186 H150" stroke-dasharray="3 6"/>'),
+    graphics: (n) => S(P('<g transform="translate(30 50)"><rect class="ink" width="90" height="110" rx="3"/><path class="ln" d="M14 90 V30 H76 V90" style="stroke-width:4.5"/><path class="thin" d="M14 60 H76"/><text x="45" y="132" class="lbl-s" text-anchor="middle">реф</text></g>' +
+      '<path class="ln flow" d="M128 104 H160"/>' +
+      '<g transform="translate(168 50)"><rect class="ink" width="110" height="110" rx="3"/>' +
+      '<path class="ln drawonce" style="stroke-width:5" d="M14 92 V22 H96 V92"/><path class="ln drawonce" style="stroke-width:1.6;animation-delay:1.2s" d="M14 58 H96"/><path class="thin drawonce" style="animation-delay:1.6s" d="M55 22 V92" stroke-dasharray="3 4"/>' +
+      '<text x="55" y="132" class="lbl-s" text-anchor="middle">шаблон вида</text></g>', 192, 52, .96) + M("point", n)),
+    family: (n) => S(P('<g transform="translate(260 150)"><g class="flyin1"><rect class="ink" x="-40" y="-90" width="80" height="70" rx="10"/></g>' +
+      '<g class="flyin2"><rect class="ink" x="-50" y="-24" width="100" height="24" rx="8"/></g>' +
+      '<g class="flyin3"><path class="ln" d="M-40 0 L-46 56 M40 0 L46 56 M-20 0 L-22 46 M20 0 L22 46"/></g></g>' +
+      '<text x="260" y="244" class="lbl" text-anchor="middle">параметры · типы</text>') + M("think", n)),
+    axis: (n) => S(P('<g transform="translate(150 30)"><rect class="ink" width="230" height="200" rx="3"/>' +
+      '<path class="thin" d="M50 34 V186 M110 34 V186 M170 34 V186 M30 70 H210 M30 120 H210 M30 166 H210" stroke-dasharray="7 4 2 4"/>' +
+      '<circle class="ink" cx="50" cy="20" r="11"/><text x="50" y="24" class="lbl-s" text-anchor="middle" style="fill:' + B + '">1</text><circle class="ink" cx="110" cy="20" r="11"/><text x="110" y="24" class="lbl-s" text-anchor="middle" style="fill:' + B + '">2</text><circle class="ink" cx="170" cy="20" r="11"/><text x="170" y="24" class="lbl-s" text-anchor="middle" style="fill:' + B + '">3</text>' +
+      '<circle class="ink" cx="16" cy="70" r="11"/><text x="16" y="74" class="lbl-s" text-anchor="middle" style="fill:' + B + '">А</text><circle class="ink" cx="16" cy="120" r="11"/><text x="16" y="124" class="lbl-s" text-anchor="middle" style="fill:' + B + '">Б</text><circle class="ink" cx="16" cy="166" r="11"/><text x="16" y="170" class="lbl-s" text-anchor="middle" style="fill:' + B + '">В</text>' +
+      '<g transform="translate(50 166)"><circle r="12" fill="none" stroke="' + B + '" stroke-width="2.4" class="pulse" style="animation-delay:3.4s"/>' +
+      '<g class="seek"><circle class="ink" r="26" style="fill:rgba(255,255,255,.6)"/><path class="ln" d="M18 18 L40 40" style="stroke-width:6"/></g></g></g>', 40, 40, 1.08) + M("think", n)),
+    upload: (n) => S(P('<path class="thin" d="M150 170 Q230 60 300 80" stroke-dasharray="4 7"/>' +
+      '<g transform="translate(150 150)"><g class="fly"><path class="ink" d="M0 0 H34 L44 10 V50 H0Z"/><path class="thin" d="M8 18 H34 M8 28 H36 M8 38 H26"/></g></g>' +
+      '<g transform="translate(310 80)"><path class="ink" d="M-60 20 Q-64 -14 -30 -14 Q-20 -44 12 -36 Q40 -50 52 -18 Q76 -14 70 20Z"/>' +
+      '<rect class="solid" x="-12" y="-8" width="24" height="20" rx="3"/><path class="ln" d="M-7 -8 V-14 A7 7 0 0 1 7 -14 V-8"/></g>' +
+      '<text x="310" y="140" class="lbl" text-anchor="middle">сервер · шифр</text>') + M("point", n)),
+    forbidden: (n) => S(P('<g transform="translate(190 70)"><rect class="ink" width="60" height="40" rx="5"/><circle cx="18" cy="20" r="8" class="grey"/><path class="thin" d="M32 14 H52 M32 24 H48"/><text x="30" y="58" class="lbl-s" text-anchor="middle">паспорт</text></g>' +
+      '<g transform="translate(270 70)"><rect class="ink" width="64" height="40" rx="5"/><rect y="10" width="64" height="8" fill="' + B + '"/><text x="32" y="58" class="lbl-s" text-anchor="middle">карта</text></g>' +
+      '<g transform="translate(230 150)"><circle class="ink" cx="14" cy="14" r="12"/><path class="ln" d="M26 14 H70 M58 14 V26 M66 14 V22"/><text x="42" y="48" class="lbl-s" text-anchor="middle">пароли</text></g>' +
+      '<path class="ln strike" style="stroke-width:5" d="M178 56 L352 214"/>') + M("stop", n)),
+    eye: (n) => S(P('<g transform="translate(270 120)"><path class="ink" d="M-90 0 Q0 -80 90 0 Q0 80 -90 0Z"/>' +
+      '<g class="lid"><circle class="solid" r="26"/><circle r="9" fill="#fff"/></g></g>' +
+      '<g transform="translate(270 210)"><rect class="solid" x="-68" y="-16" width="136" height="32" rx="16"/><text y="4.5" class="lbl-inv" text-anchor="middle">только ты</text></g>') + M("hush", n))
+  };
+
+  const VB = {"render": "162 53 319 239", "inpaint": "151 58 323 242", "texture": "179 86 270 203", "upscale": "180 60 262 196", "script": "215 58 246 185", "max": "205 63 266 199", "optimize": "183 98 271 203", "film": "192 46 290 218", "claude": "144 78 369 277", "concept": "198 46 287 215", "archicad": "175 81 276 207", "scales": "175 87 313 235", "tiles": "156 76 269 201", "album": "174 80 268 201", "table": "172 69 282 212", "revit": "165 80 279 209", "prompt": "178 36 320 240", "limits": "20 40 452 300", "graphics": "213 70 266 200", "family": "155 79 306 229", "axis": "138 48 334 250", "upload": "175 56 278 208", "forbidden": "181 76 265 199", "eye": "194 100 248 186", "rules": "135 26 408 306", "more": "139 48 412 309", "zoom": "238 86 224 168"};
+  const crop = (svgHtml, key) => VB[key] ? svgHtml.replace('viewBox="0 0 480 340"', 'viewBox="' + VB[key] + '"') : svgHtml;
+
+  /* conductor: the rules are the score, the rest is dialogue */
+  const RULES_SCENE = () => S(
+    '<g transform="translate(318 318)"><path class="ln" d="M0 0 V-118 M-22 0 L0 -14 L22 0"/>' +
+    '<g transform="translate(0 -118) rotate(-6)"><path class="ink" d="M-58 4 L0 0 L0 -62 L-58 -58 Z"/><path class="ink" d="M58 4 L0 0 L0 -62 L58 -58 Z"/>' +
+    '<path class="thin" d="M-48 -44 H-10 M-48 -34 H-14 M-48 -24 H-8 M10 -44 H48 M10 -34 H42 M10 -24 H46"/>' +
+    '<rect class="solid" x="-42" y="-14" width="84" height="22" rx="4"/><text y="1.5" class="lbl-inv" text-anchor="middle" style="font-size:11px">правила</text></g></g>' +
+    '<g transform="translate(414 236)"><g class="rise"><rect class="ink" x="-40" y="-15" width="80" height="30" rx="14"/><text y="4.5" class="lbl" text-anchor="middle" style="font-size:11px">задача</text></g></g>' +
+    '<g transform="translate(414 236)"><g class="rise" style="animation-delay:1.5s"><rect class="solid" x="-40" y="-15" width="80" height="30" rx="14"/><text y="4.5" class="lbl-inv" text-anchor="middle" style="font-size:11px">ответ</text></g></g>' +
+    '<g transform="translate(414 236)"><g class="rise" style="animation-delay:3s"><rect class="ink" x="-40" y="-15" width="80" height="30" rx="14"/><text y="4.5" class="lbl" text-anchor="middle" style="font-size:11px">правка</text></g></g>' +
+    '<g transform="translate(232 92)"><g class="popl"><path class="solid" d="M0 0 V-22 L14 -26 V-4" style="fill:none"/><circle class="solid" cx="-4" cy="0" r="4.5"/><circle class="solid" cx="10" cy="-4" r="4.5"/></g></g>' +
+    '<g transform="translate(262 60)"><g class="popl" style="animation-delay:1.2s"><path class="solid" d="M0 0 V-20" style="fill:none"/><circle class="solid" cx="-4" cy="0" r="4.5"/></g></g>');
+
+  const MORE_SCENE = () => S('<g transform="translate(352 296)"><g class="wobble"><text class="qbig" text-anchor="middle">?</text></g></g>' +
+    '<g transform="translate(242 96)"><g class="popl"><text class="qsmall" text-anchor="middle">?</text></g></g>' +
+    '<g transform="translate(450 140)"><g class="popl" style="animation-delay:1.1s"><text class="qsmall" text-anchor="middle" style="font-size:24px">?</text></g></g>' +
+    '<g transform="translate(262 250)"><g class="popl" style="animation-delay:2.2s"><text class="qsmall" text-anchor="middle" style="font-size:20px">?</text></g></g>');
+  const ZOOM_SCENE = () => S('<g transform="translate(350 170)">' +
+    '<circle r="70" fill="none" stroke="' + B + '" stroke-width="1.6" class="ring"/><circle r="70" fill="none" stroke="' + B + '" stroke-width="1.6" class="ring" style="animation-delay:1.2s"/>' +
+    '<rect class="ink" x="-72" y="-50" width="144" height="100" rx="26"/><rect class="solid" x="-44" y="-24" width="56" height="48" rx="10"/><path class="solid" d="M18 -8 L44 -24 V24 L18 8Z"/>' +
+    '<circle cx="54" cy="-34" r="5" fill="' + B + '" class="blink" style="animation-duration:1.4s"/></g>');
+
+  /* ---------- build slides ---------- */
+  const track = document.getElementById("track");
+  const slides = [];
+  const RENDER = [];
+  const holder = (cls, fn) => { RENDER.push(fn); return '<div class="' + cls + '" data-r="' + (RENDER.length - 1) + '">' + fn() + '</div>'; };
+  const add = (html, cls, token, label, extra) => {
+    const el = document.createElement("section");
+    el.className = "slide " + (cls || "");
+    el.innerHTML = html;
+    el.dataset.token = token;
+    track.appendChild(el);
+    slides.push(Object.assign({ el, token, label }, extra || {}));
+  };
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+
+  /* logo: Dyer halftone mark + wordmark; the dots ripple out from the centre */
+  const LOGO = (() => {
+    let c = "";
+    MARK.forEach(([x, y, r]) => {
+      const d = Math.hypot(x - 310, y - 318) / 300;
+      c += '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" style="animation-delay:' + (0.1 + d * 0.6).toFixed(2) + 's,' + (2.2 + d * 0.9).toFixed(2) + 's"/>';
+    });
+    return '<svg class="logo" viewBox="60 68 1874 1073" role="img" aria-label="Dyer"><g class="mark">' + c + '</g><use class="wm" href="#dyerW" x="595" y="459" width="1323" height="666"/></svg>';
+  })();
+
+  add('<div class="cover">' +
+      '<div class="lockup">' + LOGO + '<span class="sep"></span><span class="lesson">AI Lesson <b>01</b></span></div>' +
+      '<p class="cover-sub">Вопросы коллег · ответы вживую</p></div>',
+    "cover-slide", "start", "Начало");
+
+  add('<div class="rules"><div>' +
+      '<div class="eyebrow">Перед вопросами</div>' +
+      '<h2 class="h1">Самое сложное&nbsp;— <em>правила</em>. Остальное — диалог.</h2>' +
+      '<ol class="steps">' +
+      '<li><span class="n">1</span><div><b>Установить</b>Проект в Claude, инструкции и файл правил бюро. Один раз.</div></li>' +
+      '<li><span class="n">2</span><div><b>Учесть правила</b>Копия модели, короткие шаги, сохранения, чужое не трогаем. Так мы ничего не сломаем.</div></li>' +
+      '<li class="light"><span class="n">3</span><div><b>Дальше — разговор</b>Ставишь задачу, смотришь результат, просишь поправить. Ты дирижёр, Claude играет.</div></li>' +
+      '</ol></div>' + holder("scene", () => crop(RULES_SCENE(), "rules")) + '</div><div class="cap">Правила работы</div>',
+    "rules-slide", "rules", "Правила работы");
+
+  const plural = (n) => n + " " + (n % 10 === 1 && n % 100 !== 11 ? "вопрос" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? "вопроса" : "вопросов");
+  let lastPerson = null, qn = 0;
+  Q.forEach(([pk, text, scene, short]) => {
+    const p = PEOPLE[pk];
+    if (pk !== lastPerson) {
+      const count = Q.filter((q) => q[0] === pk).length;
+      add('<div class="p-wrap"><div class="p-ava">' + avaHtml(pk) + '</div>' +
+          '<div class="p-text"><div class="p-kicker">Вопросы от</div><h2 class="p-name">' + p.name + '</h2><div class="p-role">' + p.role + '</div><div class="p-count">' + plural(count) + '</div></div></div>',
+        "person-slide", "p-" + pk, p.name, { person: pk });
+      lastPerson = pk;
+    }
+    qn++;
+    const n = String(qn).padStart(2, "0");
+    add('<div class="q-grid"><div>' +
+        '<div class="q-meta"><span class="q-num">' + n + '</span><span class="q-who"><b>' + p.name + '</b> · ' + p.role + '</span></div>' +
+        '<div class="msg">' + avaHtml(pk) +
+        '<div class="bubble"><span class="who">' + p.name + '</span><p class="q" data-text="' + esc(text) + '">' + esc(text) + '</p></div></div>' +
+        '</div>' + holder("scene", () => crop(SCENES[scene](n), scene)) + '</div>' +
+        '<div class="cap">' + short + '</div>',
+      "q-slide", "q" + qn, short, { person: pk, qn: n, isQ: true });
+  });
+
+  add('<div class="center">' + holder("end-hero", () => crop(MORE_SCENE(), "more")) + '<p class="big">Ещё вопросы?</p><p>Спрашивайте сейчас, пока мы здесь.</p></div>', "more-slide", "more", "Ещё вопросы");
+
+  add('<div class="center">' + holder("end-hero", () => crop(ZOOM_SCENE(), "zoom")) +
+      '<p class="big">Переходим в Zoom</p><p>Даниил подключается к тестовой модели</p><div class="loading"><i></i><i></i><i></i></div></div>',
+    "zoom-slide", "zoom", "Zoom и тестовая модель");
+
+  /* ---------- table of contents ---------- */
+  const toc = document.getElementById("toc");
+  let tocHtml = '<div class="toc-group"><a href="#start" data-go="0"><span>·</span><span>Начало</span></a><a href="#rules" data-go="1"><span>!</span><span>Правила работы</span></a></div>';
+  let group = null;
+  slides.forEach((s, i) => {
+    if (s.isQ && s.person !== group) {
+      if (group) tocHtml += "</div>";
+      group = s.person;
+      const p = PEOPLE[group];
+      tocHtml += '<div class="toc-group"><div class="toc-person">' + avaHtml(group) + '<div><b>' + p.name + '</b><small>' + p.role + '</small></div></div>';
+    }
+    if (s.isQ) tocHtml += '<a href="#' + s.token + '" data-go="' + i + '"><span>' + s.qn + '</span><span>' + esc(Q[parseInt(s.qn, 10) - 1][1]) + '</span></a>';
+  });
+  tocHtml += '</div><div class="toc-group"><a href="#more" data-go="' + (slides.length - 2) + '"><span>?</span><span>Ещё вопросы</span></a><a href="#zoom" data-go="' + (slides.length - 1) + '"><span>→</span><span>Zoom и тестовая модель</span></a></div>';
+  toc.innerHTML = tocHtml;
+
+  /* ---------- navigation ---------- */
+  const counter = document.getElementById("counter");
+  const fill = document.getElementById("meterFill");
+  const arrow = document.getElementById("meterArrow");
+  const drawer = document.getElementById("drawer");
+  const scrim = document.getElementById("scrim");
+  const menuBtn = document.getElementById("menuBtn");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let cur = -1, typingTimer = null, startTimer = null;
+
+  /* the colleague "types" the question in the chat */
+  function typeQuestion(slide) {
+    clearInterval(typingTimer); clearTimeout(startTimer);
+    const q = slide.querySelector(".q");
+    if (!q) return;
+    const full = q.dataset.text.replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&amp;/g, "&");
+    if (reduce) { q.textContent = full; return; }
+    q.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+    const step = Math.max(12, Math.min(28, 1500 / full.length));
+    startTimer = setTimeout(() => {
+      let i = 0;
+      typingTimer = setInterval(() => {
+        i += 1;
+        q.textContent = full.slice(0, i);
+        if (i < full.length) q.insertAdjacentHTML("beforeend", '<span class="caret"></span>');
+        else clearInterval(typingTimer);
+      }, step);
+    }, 1100);
+  }
+
+  function go(i, instant) {
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    if (i === cur) return;
+    if (cur >= 0) slides[cur].el.classList.remove("is-active");
+    cur = i;
+    const s = slides[cur];
+    if (instant) { track.style.transition = "none"; requestAnimationFrame(() => (track.style.transition = "")); }
+    track.style.transform = "translateY(" + (-cur * 100) + "%)";
+    s.el.querySelectorAll("[data-r]").forEach((h) => { h.innerHTML = RENDER[+h.dataset.r](); });   // restart the show
+    void s.el.offsetWidth; s.el.classList.add("is-active");
+    typeQuestion(s.el);
+    counter.innerHTML = s.isQ ? "<b>" + s.qn + "</b> / " + Q.length : s.label;
+    toc.querySelectorAll("a").forEach((a) => a.classList.toggle("current", +a.dataset.go === cur));
+    arrow.textContent = cur === slides.length - 1 ? "↑" : "↓";
+    try { history.replaceState(null, "", "#" + s.token); } catch (e) {}
+  }
+
+  /* one full wheel stroke = one slide; the meter shows how far you have to go */
+  const THRESH = 420;
+  let acc = 0, lockUntil = 0, lastWheel = 0, decayTimer = null;
+  function setMeter() {
+    const p = Math.min(1, Math.abs(acc) / THRESH);
+    fill.classList.toggle("up", acc < 0);
+    fill.style.transform = "scaleY(" + p + ")";
+  }
+  window.addEventListener("wheel", (e) => {
+    if (drawer.classList.contains("open")) return;
+    e.preventDefault();
+    const now = performance.now();
+    const dy = e.deltaMode === 1 ? e.deltaY * 32 : e.deltaMode === 2 ? e.deltaY * 800 : e.deltaY;
+    const gap = now - lastWheel; lastWheel = now;
+    if (now < lockUntil) { lockUntil = Math.max(lockUntil, now + 260); return; }   // swallow trackpad inertia
+    if (gap > 900) acc = 0;
+    if ((dy > 0 && acc < 0) || (dy < 0 && acc > 0)) acc = 0;
+    acc += dy;
+    setMeter();
+    clearTimeout(decayTimer);
+    decayTimer = setTimeout(() => { acc = 0; setMeter(); }, 900);
+    if (Math.abs(acc) >= THRESH) {
+      const dir = acc > 0 ? 1 : -1;
+      acc = 0; setMeter();
+      lockUntil = now + 1050;
+      go(cur + dir);
+    }
+  }, { passive: false });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") return closeMenu();
+    if (drawer.classList.contains("open")) return;
+    if (["ArrowDown", "PageDown", " ", "ArrowRight"].includes(e.key)) { e.preventDefault(); go(cur + 1); }
+    else if (["ArrowUp", "PageUp", "ArrowLeft"].includes(e.key)) { e.preventDefault(); go(cur - 1); }
+    else if (e.key === "Home") go(0);
+    else if (e.key === "End") go(slides.length - 1);
+    else if (e.key.toLowerCase() === "m" || e.key.toLowerCase() === "ь") openMenu();
+  });
+
+  let ty = null;
+  window.addEventListener("touchstart", (e) => { ty = e.touches[0].clientY; }, { passive: true });
+  window.addEventListener("touchend", (e) => {
+    if (ty === null || drawer.classList.contains("open")) return;
+    const d = ty - e.changedTouches[0].clientY; ty = null;
+    if (Math.abs(d) > 60) go(cur + (d > 0 ? 1 : -1));
+  }, { passive: true });
+
+  function openMenu() {
+    drawer.classList.add("open"); scrim.classList.add("on"); menuBtn.setAttribute("aria-expanded", "true");
+    const c = toc.querySelector("a.current"); if (c) c.scrollIntoView({ block: "center" });
+  }
+  function closeMenu() { drawer.classList.remove("open"); scrim.classList.remove("on"); menuBtn.setAttribute("aria-expanded", "false"); }
+  menuBtn.addEventListener("click", openMenu);
+  document.getElementById("closeBtn").addEventListener("click", closeMenu);
+  scrim.addEventListener("click", closeMenu);
+  toc.addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-go]"); if (!a) return;
+    e.preventDefault(); closeMenu(); setTimeout(() => go(+a.dataset.go), 250);
+  });
+
+  window.addEventListener("hashchange", () => {
+    const k = slides.findIndex((s) => "#" + s.token === location.hash);
+    if (k >= 0) go(k);
+  });
+  const start = slides.findIndex((s) => "#" + s.token === location.hash);
+  go(start >= 0 ? start : 0, true);
+})();
+</script>
+
+</body>
+</html>
