@@ -383,6 +383,116 @@ svg * { transform-box: fill-box; transform-origin: center; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: .2s !important; }
 }
+
+/* ---------- course examples: a button under the question opens a macOS-like window ---------- */
+.ex-btn {
+  margin: 22px 0 0 80px; display: inline-flex; align-items: center; gap: 12px;
+  padding: 6px 18px 6px 6px; border-radius: 999px; border: 1px solid var(--line); background: #fff;
+  font: 400 13.5px/1 var(--font); color: var(--text); cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15,45,87,.04), 0 8px 24px rgba(15,45,87,.06);
+  transition: transform .35s var(--spring), box-shadow .35s, border-color .35s;
+}
+.ex-btn img { width: 46px; height: 34px; object-fit: cover; border-radius: 999px 6px 6px 999px; display: block; }
+.ex-btn small { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; letter-spacing: .02em; }
+.ex-btn .go { width: 26px; height: 26px; border-radius: 50%; background: var(--tint); color: var(--blue); display: grid; place-items: center; margin-left: 4px; transition: background .3s, color .3s; }
+.ex-btn:hover, .ex-btn:focus-visible { transform: translateY(-2px); border-color: var(--hair); box-shadow: 0 2px 4px rgba(15,45,87,.05), 0 14px 34px rgba(15,45,87,.12); outline: none; }
+.ex-btn:hover .go { background: var(--blue); color: #fff; }
+.is-active .ex-btn { animation: fadeUp .8s var(--ease) 1.6s backwards; }
+
+.ex-scrim { position: fixed; inset: 0; z-index: 60; background: rgba(15,30,55,.28); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .45s; }
+.ex-scrim.on { opacity: 1; pointer-events: auto; }
+.win {
+  position: fixed; z-index: 61; left: 50%; top: 50%;
+  width: min(1120px, calc(100vw - 48px)); height: min(780px, calc(100vh - 48px));
+  translate: -50% -50%;
+  background: #fbfcfe; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(15,45,87,.10), 0 30px 80px rgba(15,30,55,.30), 0 8px 24px rgba(15,30,55,.12);
+  display: flex; flex-direction: column; visibility: hidden;
+  transform-origin: 50% 50%;
+}
+.win.open { visibility: visible; }
+.win-bar { height: 46px; display: grid; grid-template-columns: 90px 1fr 90px; align-items: center; padding: 0 16px; background: linear-gradient(#fff, #f4f6fa); border-bottom: 1px solid var(--line); }
+.lights { display: flex; gap: 8px; }
+.lights button { width: 13px; height: 13px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; position: relative; }
+.lights .l-close { background: #ff5f57; } .lights .l-min { background: #febc2e; } .lights .l-max { background: #28c840; }
+.lights button::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 0 .5px rgba(0,0,0,.15); }
+.lights:hover .l-close::before { content: "×"; position: absolute; inset: 0; font: 600 11px/13px var(--font); color: rgba(80,0,0,.7); }
+.win-title { text-align: center; font-size: 13px; font-weight: 400; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.win-title span { color: var(--muted); }
+.win-src { justify-self: end; font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.win-tabs { display: flex; justify-content: center; padding: 12px 16px 0; }
+.seg { display: inline-flex; background: #eef1f6; border-radius: 10px; padding: 3px; gap: 2px; position: relative; }
+.seg button { border: 0; background: none; font: 400 13px/1 var(--font); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; position: relative; z-index: 1; transition: color .25s; }
+.seg button[aria-selected="true"] { color: var(--blue); font-weight: 500; }
+.seg .pill { position: absolute; top: 3px; bottom: 3px; border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(15,45,87,.12); transition: left .4s var(--spring), width .4s var(--spring); }
+.win-body { position: relative; overflow: hidden; flex: 1; min-height: 0; }
+.pane { position: absolute; inset: 0; padding: 18px 24px 22px; overflow-y: auto; opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .35s, transform .45s var(--ease); display: grid; grid-template-rows: minmax(0,1fr) auto; gap: 12px; }
+.pane.on { opacity: 1; transform: none; pointer-events: auto; }
+.pane.scroll { display: block; }
+
+/* before / after */
+.ba { position: relative; justify-self: center; align-self: center; max-width: 100%; max-height: 100%; aspect-ratio: var(--ar); height: 100%; border-radius: 10px; overflow: hidden; background: #e9edf3; user-select: none; touch-action: none; cursor: ew-resize; box-shadow: 0 0 0 1px rgba(15,45,87,.08); }
+.ba img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.ba .before { clip-path: inset(0 calc(100% - var(--p, 50%)) 0 0); }
+.ba .handle { position: absolute; top: 0; bottom: 0; left: var(--p, 50%); width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 0 1px rgba(15,45,87,.15); }
+.ba .handle i { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; translate: -50% -50%; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 4px 16px rgba(15,30,55,.25); display: grid; place-items: center; color: var(--blue); font-style: normal; font-size: 14px; letter-spacing: -1px; backdrop-filter: blur(4px); }
+.ba .tag { position: absolute; top: 12px; padding: 6px 10px; border-radius: 999px; background: rgba(15,30,55,.55); color: #fff; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; backdrop-filter: blur(6px); }
+.ba .tag.l { left: 12px; } .ba .tag.r { right: 12px; }
+.cap2 { text-align: center; font-size: 13.5px; color: var(--muted); }
+.cap2 b { font-weight: 400; color: var(--text); }
+
+.thumbs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.thumbs button { border: 0; padding: 0; border-radius: 8px; overflow: hidden; cursor: pointer; width: 92px; height: 64px; opacity: .55; box-shadow: 0 0 0 1px rgba(15,45,87,.1); transition: opacity .25s, transform .3s var(--spring), box-shadow .25s; background: none; }
+.thumbs button img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumbs button:hover { opacity: .85; transform: translateY(-2px); }
+.thumbs button[aria-pressed="true"] { opacity: 1; box-shadow: 0 0 0 2px var(--blue); }
+.stack { display: grid; grid-template-rows: minmax(0,1fr) auto auto; gap: 12px; min-height: 0; height: 100%; }
+
+.media { justify-self: center; align-self: center; max-width: 100%; max-height: 100%; border-radius: 10px; display: block; box-shadow: 0 0 0 1px rgba(15,45,87,.08); background: #000; }
+.vwrap { position: relative; width: 100%; height: 100%; min-height: 0; }
+.vwrap video { width: 100%; height: 100%; object-fit: contain; display: block; }
+.vbtn { margin-left: 10px; vertical-align: middle; border: 0; border-radius: 999px; padding: 8px 14px; background: rgba(15,30,55,.6); color: #fff; font: 400 12px/1 var(--font); cursor: pointer; backdrop-filter: blur(6px); }
+
+.how { max-width: 820px; margin: 0 auto; display: grid; gap: 18px; padding-bottom: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-size: 12px; padding: 6px 12px; border-radius: 999px; background: var(--tint); color: var(--blue); }
+.chip.k { background: #fff; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); }
+.how h4 { margin: 0 0 6px; font-weight: 500; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.prompt { position: relative; background: #fff; border-radius: 12px; padding: 48px 20px 18px; box-shadow: 0 0 0 1px var(--line); font-size: 15.5px; line-height: 1.6; color: var(--text); }
+.prompt mark { background: none; color: inherit; border-radius: 4px; padding: 0 2px; }
+.prompt mark.obj { background: rgba(40,160,90,.13); color: #1d6b40; }
+.prompt mark.keep { background: rgba(214,60,60,.10); color: #a3302c; }
+.prompt mark.res { background: rgba(22,63,121,.10); color: var(--blue); }
+.copy { position: absolute; top: 10px; right: 10px; border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 10px; font: 400 12px/1 var(--font); color: var(--blue); cursor: pointer; }
+.copy:hover { background: var(--tint); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.legend .obj::before { background: rgba(40,160,90,.45); } .legend .keep::before { background: rgba(214,60,60,.4); } .legend .res::before { background: rgba(22,63,121,.35); }
+.tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.tip { background: #fff; border-radius: 12px; padding: 14px 16px; box-shadow: 0 0 0 1px var(--line); font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.tip b { display: block; font-weight: 500; color: var(--text); margin-bottom: 4px; font-size: 14px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--text); }
+.swatches span { display: inline-flex; align-items: center; gap: 8px; }
+.swatches i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+.shot { width: 100%; border-radius: 10px; display: block; box-shadow: 0 0 0 1px rgba(15,45,87,.08); }
+.cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-content: center; height: 100%; }
+.cards3 figure { margin: 0; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px var(--line); transition: transform .4s var(--spring), box-shadow .4s; }
+.cards3 figure:hover { transform: translateY(-4px); box-shadow: 0 0 0 1px var(--hair), 0 18px 40px rgba(15,45,87,.12); }
+.cards3 img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.cards3 figcaption { padding: 12px 14px 14px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.cards3 figcaption b { display: block; color: var(--text); font-weight: 500; margin-bottom: 2px; }
+.pane.on .cards3 figure { animation: fadeUp .7s var(--ease) backwards; }
+.pane.on .cards3 figure:nth-child(2) { animation-delay: .08s } .pane.on .cards3 figure:nth-child(3) { animation-delay: .16s }
+@media (max-width: 860px) {
+  .ex-btn { margin: 14px 0 0 54px; font-size: 13px; }
+  .win { width: calc(100vw - 16px); height: calc(100vh - 24px); border-radius: 14px; }
+  .win-bar { grid-template-columns: 60px 1fr 0; } .win-src { display: none; }
+  .seg button { padding: 8px 11px; font-size: 12.5px; }
+  .pane { padding: 12px 12px 16px; }
+  .cards3 { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .ba { height: auto; width: 100%; }
+}
+
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -404,6 +514,7 @@ svg * { transform-box: fill-box; transform-origin: center; }
   <div class="drawer-head"><h2>Вопросы</h2><button class="close" id="closeBtn" aria-label="Закрыть меню">×</button></div>
   <div class="toc" id="toc"></div>
 </nav>
+<div class="ex-scrim" id="exScrim"></div><div class="win" id="win" role="dialog" aria-modal="true" aria-labelledby="winTitle"><div class="win-bar"><div class="lights"><button class="l-close" aria-label="Закрыть"></button><button class="l-min" tabindex="-1" aria-hidden="true"></button><button class="l-max" tabindex="-1" aria-hidden="true"></button></div><div class="win-title" id="winTitle"></div><div class="win-src">БВШД × AI</div></div><div class="win-tabs"><div class="seg" id="seg" role="tablist"></div></div><div class="win-body" id="winBody"></div></div>
 <div class="meter" aria-hidden="true">
   <span class="arrow" id="meterArrow">↓</span>
   <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
@@ -643,6 +754,196 @@ svg * { transform-box: fill-box; transform-origin: center; }
     slides.push(Object.assign({ el, token, label }, extra || {}));
   };
   const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+  /* ==========================================================
+     Course examples (БВШД × AI): before/after, video, prompts.
+     Opens without scrolling, like a macOS window from its button.
+     ========================================================== */
+  const IMG = (n) => "img/" + n + ".jpg";
+  const P5 = "Убери все {o:обьекты стоящие на полу}. Убери {o:пленку с окна}. Убери {o:стоящие на полу зеркала}. Закрой {o:открытые двери}. Убери {o:проводку, которая открыто находится на стене}. Закатай {o:все стены} в светлую штукатурку. Закрой {o:отверстия на полу} подходящей плиткой. Убери с потолка всяческие {o:датчики}, {k:оставь исторические молдинги и люстры}. {k:Не трогай лепнину и декоративные элементы.}";
+  const P6 = "Сгенерируй из первой фотографии стильный интерьер с баром. Требования к интерьеру — {k:не менять цвет стен, не трогать лепнину, не убирать предметы освещения}. На второй фотографии есть маркировка объектов, которые нужно вставить: {o:красным цветом — барная стойка}; {o:зелёным цветом — современные барные стулья}; {o:синим цветом — за барным столом у стены находится зона с барной утварью}; {o:фиолетовым цветом — диванная зона из современной стильной мебели тёмного цвета, с журнальным столиком из рифлёного стекла с подсветкой внутри}. Подбери современные предметы интерьера в эти блоки, {k:не меняй размер блоков}, мебель должна соответствовать габаритам блоков. Сотри все цветные маркировки и оставь только интерьер. {k:Не менять пропорции помещения и не трогать детали.} {r:Фотореалистичный рендер интерьера.} {r:Сотри все цветные маркировки предметов из кадра.}";
+  const P7 = "Сделай интерьер очень современным, {k:не трогая при этом лепнину, отделку пола, колонны}. {k:Не меняй пропорции помещения и обьектов.} Можно добавлять источники света, ковры и другие предметы для достижения результата. {r:Фотореалистичный рендер интерьера бара с зоной отдыха.}";
+  const P11 = "Сгенерируй фотореалистичную визуализацию интерьера. {o:На основе 3д модели из первого кадра} выполни интерьер старого цеха с новой постройкой общественного характера внутри. {k:Старайся сохранить геометрию здания.} Внешние стены здания отображают старинную индустриальность: выразительные текстуры и материалы, ветхие железобетонные конструкции, стальные конструкции и конструкции из красного кирпича, и крыша из старых ферм, как будто это старый цех. Внутри этого цеха находится новая разноуровневая тёплая постройка общественного и рекреационного назначения из премиальных современных материалов и ЛСТК. Внутри здания цеха, но снаружи новой постройки, ближе к камере находится зона фудкорта, так же есть зоны отдыха снаружи нового сооружения внутри старого цеха. Необходимо отобразить контраст между старинным индустриальным зданием цеха и новой конструкцией общественного назначения внутри него. Новая конструкция выполнена из прозрачного поликарбоната, внутри новых конструкций горит свет, ходят люди, здание используется для активного отдыха, лекций, мероприятий; мосты и переходы выполнены из стальных балок с прозрачным стеклянным покрытием и ленточным освещением. Современное освещение общественного досугового пространства внутри старого интерьера. {k:Полностью сохрани геометрию здания и не меняй ракурс с уровня человеческого глаза.} {r:Фотореалистичная визуализация интерьера.}";
+
+  const mk = (t) => esc(t).replace(/\{([okr]):([^}]*)\}/g, (_, c, s) => '<mark class="' + ({ o: "obj", k: "keep", r: "res" })[c] + '">' + s + '</mark>');
+  const plain = (t) => t.replace(/\{[okr]:([^}]*)\}/g, "$1");
+  const LEGEND = '<div class="legend"><span class="obj">объекты в кадре</span><span class="keep">что сохранить</span><span class="res">какой результат</span></div>';
+  const promptBox = (t) => '<div class="prompt"><button class="copy" data-copy="' + esc(plain(t)) + '">Скопировать</button>' + mk(t) + '</div>';
+  const chips = (arr) => '<div class="chips">' + arr.map((c) => '<span class="chip' + (c[0] === "~" ? " k" : "") + '">' + c.replace(/^~/, "") + '</span>').join("") + '</div>';
+  const tips = (arr) => '<div class="tips">' + arr.map(([b, t]) => '<div class="tip"><b>' + b + '</b>' + t + '</div>').join("") + '</div>';
+  const ba = (k, ar, l, r) => '<div class="ba" style="--ar:' + ar + '"><img src="' + IMG(k + "_b") + '" alt=""><img class="before" src="' + IMG(k + "_a") + '" alt=""><span class="tag l">' + (l || "До") + '</span><span class="tag r">' + (r || "После") + '</span><div class="handle"><i>‹ ›</i></div></div>';
+  /* a before/after viewer with a strip of examples under it */
+  const gallery = (items) => '<div class="stack" data-gal=\'' + JSON.stringify(items).replace(/'/g, "&#39;") + '\'>' +
+    ba(items[0].k, items[0].ar, items[0].l, items[0].r) + '<div class="cap2">' + items[0].c + '</div>' +
+    (items.length > 1 ? '<div class="thumbs">' + items.map((it, i) => '<button aria-pressed="' + (i === 0) + '" data-i="' + i + '" aria-label="' + esc(it.c.replace(/<[^>]+>/g, "")) + '"><img src="' + IMG(it.k + "_b") + '" alt=""></button>').join("") + '</div>' : "") + '</div>';
+
+  const EX = {
+    render: {
+      title: "Смена стилистики готового кадра", thumb: "style_b",
+      tabs: [
+        ["Пример", () => gallery([
+          { k: "style", ar: "1000/887", c: "<b>Тот же зал, та же геометрия</b> · стилистика сменена одним текстовым запросом" },
+          { k: "hall1", ar: "1000/889", c: "<b>Пустой зал → кабинет</b> · сохранены потолок, окна и пропорции" },
+          { k: "hall2", ar: "1000/889", c: "<b>Пустой зал → показ</b> · колонны и свет на месте, меняется сценарий" }])],
+        ["Как делали", () => '<div class="how">' + chips(["Nano Banana Pro", "в Syntx AI", "~1 кадр + текст"]) +
+          '<div><h4>Промпт</h4>' + promptBox(P7) + '</div>' + LEGEND +
+          tips([["Сначала — что не трогать", "Лепнина, пол, колонны, пропорции. Модель легко «улучшает» лишнее, если не запретить."],
+                ["Первая генерация — основа", "Коммерческий кадр не делается в один клик: берём лучший вариант и дожимаем итерациями."],
+                ["Важное — повторить", "Ключевое требование можно повторить в конце промпта, модель его лучше удерживает."]]) + '</div>']
+      ]
+    },
+    inpaint: {
+      title: "Правка объектов: маркировка цветом", thumb: "bar_b",
+      tabs: [
+        ["Пример", () => gallery([
+          { k: "bar", ar: "1000/717", l: "Маркировка", r: "Результат", c: "<b>Нарисовали блоки цветом</b> · модель поставила мебель ровно в эти габариты" },
+          { k: "clean", ar: "1000/717", c: "<b>Удаление лишнего</b> · убрали мусор, проводку, плёнку, закрыли двери и отверстия в полу" }])],
+        ["Как делали", () => '<div class="how">' + chips(["Nano Banana Pro", "в Syntx AI", "~2 кадра: фото + маркировка"]) +
+          '<div><h4>Цвет = объект</h4><div class="swatches"><span><i style="background:#e0312b"></i>барная стойка</span><span><i style="background:#2bd14a"></i>барные стулья</span><span><i style="background:#2a4fe0"></i>зона барной утвари</span><span><i style="background:#c83fd6"></i>диванная зона</span></div></div>' +
+          '<div><h4>Промпт</h4>' + promptBox(P6) + '</div>' + LEGEND +
+          tips([["Три способа инпейнта", "Текст + выделение в Syntx · обводка объекта в Photoshop + текст · коллаж + текст."],
+                ["Размер блока = габарит", "Модель подбирает мебель под нарисованный прямоугольник, поэтому рисуем в масштабе."],
+                ["Повторяемся", "«Сотри маркировки» сказано дважды — иначе цветные линии иногда остаются в кадре."]]) + '</div>'],
+        ["Удаление", () => '<div class="how">' + chips(["Nano Banana Pro", "~1 кадр"]) + '<div><h4>Промпт очистки зала</h4>' + promptBox(P5) + '</div>' + LEGEND + '</div>']
+      ]
+    },
+    upscale: {
+      title: "Апскейл: из мыла в журнальный кадр", thumb: "up_b",
+      tabs: [
+        ["Пример", () => gallery([{ k: "up", ar: "1000/833", l: "Исходник", r: "Апскейл", c: "<b>Фрагмент кадра крупно</b> · ткань, кожа, доски настила и хвоя появились после апскейла" }])],
+        ["Весь кадр", () => '<div class="stack" style="grid-template-rows:minmax(0,1fr) auto"><img class="media" src="' + IMG("agent_atmo") + '" alt="Йога-площадка над озером" style="background:none"><div class="cap2"><b>Финал 4800 px</b> · кадр агента «Атмосфера», доведённый апскейлом</div></div>'],
+        ["Как делали", () => '<div class="how">' + chips(["Magnific", "Topaz", "Редактор в Syntx AI", "~GPT Image 2 — доработка"]) +
+          '<img class="shot" src="' + IMG("ui_upscale") + '" alt="Апскейл в редакторе Syntx: ползунки креативности и детализации" loading="lazy">' +
+          tips([["Генерация → журнал", "Хорошая генерация ещё не фото для Dezeen. Апскейл докручивает микродетали, фактуру ткани и свет."],
+                ["Ползунки, а не магия", "Креативность низко — чтобы не поменялись лица и форма; детализация выше — чтобы появилась фактура."],
+                ["Слева — честно", "Для наглядности слева тот же фрагмент, сжатый в 10 раз: так выглядит маленький исходник."]]) + '</div>']
+      ]
+    },
+    film: {
+      title: "Анимация из статичного рендера", thumb: "film_poster",
+      tabs: [
+        ["Видео", () => '<div class="stack" style="grid-template-rows:minmax(0,1fr) auto"><div class="vwrap"><video src="img/film.mp4" poster="' + IMG("film_poster") + '" autoplay muted loop playsinline></video></div><div class="cap2"><b>15 секунд из одного кадра</b> · камера облетает дом, появляется герой <button class="vbtn" data-sound>Включить звук</button></div></div>']
+      ]
+    },
+    concept: {
+      title: "Концепт по 3D-объёму и тексту", thumb: "ceh_b",
+      tabs: [
+        ["Пример", () => gallery([
+          { k: "ceh", ar: "1000/715", l: "3D-объём", r: "Концепт", c: "<b>Старый цех</b> · новая постройка внутри, геометрия и ракурс сохранены" },
+          { k: "balloon", ar: "1000/888", l: "3D-объём", r: "Концепт", c: "<b>Фудкорт под оболочкой</b> · из белой модели без материалов" },
+          { k: "gallery", ar: "1000/888", l: "3D-объём", r: "Концепт", c: "<b>Галерея с домиками</b> · озеленение и люди дописаны текстом" },
+          { k: "bridge", ar: "1000/890", l: "3D-объём", r: "Концепт", c: "<b>Переход</b> · из серого объёма в общественное пространство" },
+          { k: "facade", ar: "1000/888", l: "Объём", r: "Концепт", c: "<b>Фасад</b> · материалы и закатный свет" },
+          { k: "resto", ar: "1000/583", l: "3D-объём", r: "День", c: "<b>Ресторан</b> · одна модель — разное настроение" },
+          { k: "restonight", ar: "1000/583", l: "3D-объём", r: "Вечер", c: "<b>Ресторан вечером</b> · свет и атмосфера меняются текстом" }])],
+        ["Как делали", () => '<div class="how">' + chips(["Nano Banana Pro", "в Syntx AI", "~скрин 3D-модели + текст"]) +
+          '<div><h4>Промпт для цеха</h4>' + promptBox(P11) + '</div>' + LEGEND +
+          tips([["Скрин — это каркас", "Модель держит геометрию и ракурс скриншота, а материалы, людей и свет берёт из текста."],
+                ["Контраст словами", "Чем точнее описан характер («старый цех» против «тёплой новой постройки»), тем убедительнее кадр."]]) + '</div>']
+      ]
+    },
+    prompt: {
+      title: "Как устроен рабочий промпт", thumb: "clean_b",
+      tabs: [
+        ["Разбор", () => '<div class="how">' + '<div><h4>Промпт из курса</h4>' + promptBox(P5) + '</div>' + LEGEND +
+          tips([["Привязка к кадру", "Не «красивый интерьер», а действия с тем, что уже есть: стены, проёмы, колонны, люстры."],
+                ["Задача по шагам", "Одно действие — одно предложение. Модели проще выполнить список, чем общий образ."],
+                ["Что не трогать", "Отдельной фразой в конце. Иногда важно повторить её дважды."]]) + '</div>'],
+        ["Результат", () => gallery([{ k: "clean", ar: "1000/717", c: "<b>Результат этого промпта</b> · геометрия и лепнина на месте, всё лишнее ушло" }])]
+      ]
+    },
+    limits: {
+      title: "Три агента — три задачи", thumb: "agent_geo",
+      tabs: [
+        ["Примеры", () => '<div class="cards3">' +
+          '<figure><img src="' + IMG("agent_geo") + '" alt="" loading="lazy"><figcaption><b>Гео-контроль</b>Жёсткие коммерческие рендеры по нетекстурированной 3D-модели</figcaption></figure>' +
+          '<figure><img src="' + IMG("agent_atmo") + '" alt="" loading="lazy"><figcaption><b>Атмосфера</b>Ландшафты и общественные пространства: перенос настроения с референса</figcaption></figure>' +
+          '<figure><img src="' + IMG("agent_comm") + '" alt="" loading="lazy"><figcaption><b>Коммерческий ракурс</b>Журнальные предметные кадры, макро и акцент на материалах</figcaption></figure></div>'],
+        ["Что такое агент", () => '<div class="how">' + '<img class="shot" src="' + IMG("ui_agents") + '" alt="Список агентов в Syntx AI" loading="lazy">' +
+          tips([["Агент = готовый промпт", "Один раз настроили правила и формат (JSON), дальше просто даём картинку и пару слов."],
+                ["Потолок — твои знания", "Технически почти всё возможно. Ограничивает только то, насколько точно ты знаешь, что хочешь получить."]]) + '</div>']
+      ]
+    }
+  };
+
+  /* ----- window ----- */
+  const win = document.getElementById("win"), exScrim = document.getElementById("exScrim");
+  const winTitle = document.getElementById("winTitle"), seg = document.getElementById("seg"), winBody = document.getElementById("winBody");
+  let exOpen = null, exFrom = null;
+  const exBtn = (key) => EX[key] ? '<button class="ex-btn" data-ex="' + key + '"><img src="' + IMG(EX[key].thumb) + '" alt=""><span>Пример из курса<small>' + EX[key].title + '</small></span><span class="go" aria-hidden="true">↗</span></button>' : "";
+
+  function wireBA(root) {
+    root.querySelectorAll(".ba").forEach((el) => {
+      const set = (x) => { const r = el.getBoundingClientRect(); el.style.setProperty("--p", Math.max(0, Math.min(100, (x - r.left) / r.width * 100)) + "%"); };
+      el.onpointerdown = (e) => { el.setPointerCapture(e.pointerId); set(e.clientX); el.onpointermove = (ev) => set(ev.clientX); };
+      el.onpointerup = el.onpointercancel = () => { el.onpointermove = null; };
+      if (!reduce) {   // a short sweep shows that the picture can be compared
+        const t0 = performance.now();
+        const tick = (now) => { const t = Math.min(1, (now - t0) / 1600); const e = 1 - Math.pow(1 - t, 3);
+          el.style.setProperty("--p", (t < .5 ? 92 - 80 * (e * 2) : 12 + 38 * ((t - .5) * 2)) + "%"); if (t < 1) requestAnimationFrame(tick); };
+        setTimeout(() => requestAnimationFrame(tick), 450);
+      }
+    });
+  }
+  function showTab(i) {
+    const ex = EX[exOpen];
+    seg.querySelectorAll("button").forEach((b, k) => b.setAttribute("aria-selected", String(k === i)));
+    const btn = seg.querySelectorAll("button")[i], pill = seg.querySelector(".pill");
+    pill.style.left = btn.offsetLeft + "px"; pill.style.width = btn.offsetWidth + "px";
+    winBody.querySelectorAll(".pane").forEach((p) => { p.classList.remove("on"); p.querySelectorAll("video").forEach((v) => v.pause()); });
+    let pane = winBody.querySelector('.pane[data-i="' + i + '"]');
+    if (!pane) {
+      pane = document.createElement("div"); pane.className = "pane"; pane.dataset.i = i;
+      const html = ex.tabs[i][1](); if (html.indexOf('class="how"') >= 0 || html.indexOf("cards3") >= 0) pane.classList.add("scroll");
+      pane.innerHTML = html; winBody.appendChild(pane); wireBA(pane);
+    } else pane.querySelectorAll("video").forEach((v) => v.play().catch(() => {}));
+    requestAnimationFrame(() => pane.classList.add("on"));
+  }
+  function openEx(key, fromEl) {
+    const ex = EX[key]; if (!ex) return;
+    exOpen = key; exFrom = fromEl;
+    winTitle.textContent = ex.title;
+    seg.innerHTML = '<span class="pill"></span>' + ex.tabs.map((t, i) => '<button role="tab" data-t="' + i + '">' + t[0] + '</button>').join("");
+    seg.parentElement.style.display = ex.tabs.length > 1 ? "" : "none";
+    winBody.innerHTML = "";
+    win.classList.add("open"); exScrim.classList.add("on");
+    showTab(0);
+    // grow out of the button (FLIP)
+    const a = fromEl.getBoundingClientRect(), b = win.getBoundingClientRect();
+    const dx = a.left + a.width / 2 - (b.left + b.width / 2), dy = a.top + a.height / 2 - (b.top + b.height / 2);
+    win.animate([
+      { transform: "translate(" + dx + "px," + dy + "px) scale(" + (a.width / b.width) + "," + (a.height / b.height) + ")", opacity: .2, borderRadius: "40px" },
+      { transform: "none", opacity: 1, borderRadius: "16px" }
+    ], { duration: reduce ? 1 : 620, easing: "cubic-bezier(.2,.9,.25,1.04)" });
+    setTimeout(() => win.querySelector(".l-close").focus({ preventScroll: true }), 50);
+  }
+  function closeEx() {
+    if (!exOpen) return;
+    const a = exFrom.getBoundingClientRect(), b = win.getBoundingClientRect();
+    const dx = a.left + a.width / 2 - (b.left + b.width / 2), dy = a.top + a.height / 2 - (b.top + b.height / 2);
+    winBody.querySelectorAll("video").forEach((v) => v.pause());
+    const an = win.animate([{ transform: "none", opacity: 1 }, { transform: "translate(" + dx + "px," + dy + "px) scale(" + (a.width / b.width) + "," + (a.height / b.height) + ")", opacity: 0, borderRadius: "40px" }],
+      { duration: reduce ? 1 : 420, easing: "cubic-bezier(.5,0,.75,0)" });
+    exScrim.classList.remove("on");
+    an.onfinish = () => { win.classList.remove("open"); winBody.innerHTML = ""; };
+    const f = exFrom; exOpen = null; f.focus({ preventScroll: true });
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest(".ex-btn"); if (b) return openEx(b.dataset.ex, b);
+    const t = e.target.closest("#seg button"); if (t) return showTab(+t.dataset.t);
+    const th = e.target.closest(".thumbs button");
+    if (th) {
+      const st = th.closest(".stack"), it = JSON.parse(st.dataset.gal)[+th.dataset.i];
+      st.querySelectorAll(".thumbs button").forEach((x) => x.setAttribute("aria-pressed", String(x === th)));
+      const old = st.querySelector(".ba"); old.outerHTML = ba(it.k, it.ar, it.l, it.r);
+      st.querySelector(".cap2").innerHTML = it.c; wireBA(st); return;
+    }
+    const c = e.target.closest(".copy");
+    if (c) { try { navigator.clipboard.writeText(c.dataset.copy); c.textContent = "Скопировано"; setTimeout(() => (c.textContent = "Скопировать"), 1600); } catch (err) {} return; }
+    const s = e.target.closest("[data-sound]");
+    if (s) { const v = s.closest(".stack").querySelector("video"); v.muted = !v.muted; s.textContent = v.muted ? "Включить звук" : "Выключить звук"; return; }
+    if (e.target.closest(".l-close") || e.target === exScrim) closeEx();
+  });
+
 
   /* logo: Dyer halftone mark + wordmark; the dots ripple out from the centre */
   const LOGO = (() => {
@@ -685,7 +986,7 @@ svg * { transform-box: fill-box; transform-origin: center; }
     add('<div class="q-grid"><div>' +
         '<div class="q-meta"><span class="q-num">' + n + '</span><span class="q-who"><b>' + p.name + '</b> · ' + p.role + '</span></div>' +
         '<div class="msg">' + avaHtml(pk) +
-        '<div class="bubble"><span class="who">' + p.name + '</span><p class="q" data-text="' + esc(text) + '">' + esc(text) + '</p></div></div>' +
+        '<div class="bubble"><span class="who">' + p.name + '</span><p class="q" data-text="' + esc(text) + '">' + esc(text) + '</p></div></div>' + exBtn(scene) +
         '</div>' + holder("scene", () => crop(SCENES[scene](n), scene)) + '</div>' +
         '<div class="cap">' + short + '</div>',
       "q-slide", "q" + qn, short, { person: pk, qn: n, isQ: true });
@@ -769,7 +1070,7 @@ svg * { transform-box: fill-box; transform-origin: center; }
     fill.style.transform = "scaleY(" + p + ")";
   }
   window.addEventListener("wheel", (e) => {
-    if (drawer.classList.contains("open")) return;
+    if (drawer.classList.contains("open") || exOpen) return;
     e.preventDefault();
     const now = performance.now();
     const dy = e.deltaMode === 1 ? e.deltaY * 32 : e.deltaMode === 2 ? e.deltaY * 800 : e.deltaY;
@@ -790,8 +1091,8 @@ svg * { transform-box: fill-box; transform-origin: center; }
   }, { passive: false });
 
   window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") return closeMenu();
-    if (drawer.classList.contains("open")) return;
+    if (e.key === "Escape") return exOpen ? closeEx() : closeMenu();
+    if (drawer.classList.contains("open") || exOpen) return;
     if (["ArrowDown", "PageDown", " ", "ArrowRight"].includes(e.key)) { e.preventDefault(); go(cur + 1); }
     else if (["ArrowUp", "PageUp", "ArrowLeft"].includes(e.key)) { e.preventDefault(); go(cur - 1); }
     else if (e.key === "Home") go(0);
@@ -802,7 +1103,7 @@ svg * { transform-box: fill-box; transform-origin: center; }
   let ty = null;
   window.addEventListener("touchstart", (e) => { ty = e.touches[0].clientY; }, { passive: true });
   window.addEventListener("touchend", (e) => {
-    if (ty === null || drawer.classList.contains("open")) return;
+    if (ty === null || drawer.classList.contains("open") || exOpen) { ty = null; return; }
     const d = ty - e.changedTouches[0].clientY; ty = null;
     if (Math.abs(d) > 60) go(cur + (d > 0 ? 1 : -1));
   }, { passive: true });
